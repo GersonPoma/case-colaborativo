@@ -16,6 +16,12 @@ class Settings(BaseSettings):
     REDIS_PORT: int = 6379
     REDIS_PASSWORD: str = ""
 
+    SMTP_HOST: str = "smtp.gmail.com"
+    SMTP_PORT: int = 587
+    SMTP_USERNAME: str = ""
+    SMTP_PASSWORD: str = ""
+    FRONTEND_URL: str = "http://localhost:4200"
+
     class Config:
         env_file = ".env"
 
