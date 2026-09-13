@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from app.config.settings import settings
 from app.core.exceptions import AppException, ConflictError, ForbiddenError, NotFoundError, UnauthorizedError
+from app.modules.auth.router import router as auth_router
 
 app = FastAPI(
     title="CASE Colaborativo",
@@ -32,6 +33,9 @@ _STATUS_BY_EXCEPTION = {
 async def app_exception_handler(request: Request, exc: AppException):
     status_code = _STATUS_BY_EXCEPTION.get(type(exc), status.HTTP_400_BAD_REQUEST)
     return JSONResponse(status_code=status_code, content={"detail": exc.message})
+
+# ===== ROUTERS =====
+app.include_router(auth_router)
 
 # ===== HEALTH CHECK =====
 @app.get("/health")
