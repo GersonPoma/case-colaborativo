@@ -118,3 +118,136 @@ modules/
 │
 └── interoperability/
     └── model.py        ← Configuracion_Transpilacion
+
+
+frontend-angular/
+├── Dockerfile
+├── docker-compose.yml
+├── angular.json
+├── package.json
+├── tsconfig.json
+├── .env
+│
+└── src/
+    ├── main.ts
+    ├── index.html
+    │
+    ├── app/
+    │   ├── app.component.ts
+    │   ├── app.config.ts
+    │   ├── app.routes.ts
+    │   │
+    │   ├── core/                          ← servicios globales, guards, interceptors
+    │   │   ├── guards/
+    │   │   │   └── auth.guard.ts          ← protege rutas privadas
+    │   │   ├── interceptors/
+    │   │   │   └── auth.interceptor.ts    ← agrega JWT a cada request
+    │   │   ├── services/
+    │   │   │   ├── auth.service.ts        ← login, register, token
+    │   │   │   └── websocket.service.ts   ← conexión WebSocket global
+    │   │   └── models/
+    │   │       ├── user.model.ts          ← interfaces TypeScript
+    │   │       ├── project.model.ts
+    │   │       └── diagram.model.ts
+    │   │
+    │   ├── shared/                        ← componentes reutilizables
+    │   │   ├── components/
+    │   │   │   ├── navbar/
+    │   │   │   ├── sidebar/
+    │   │   │   ├── modal/
+    │   │   │   └── loader/
+    │   │   └── pipes/
+    │   │       └── date-format.pipe.ts
+    │   │
+    │   └── modules/                       ← un módulo por paquete PUDS
+    │       │
+    │       ├── auth/                      ← Paquete 1
+    │       │   ├── pages/
+    │       │   │   ├── login/
+    │       │   │   │   ├── login.component.ts
+    │       │   │   │   ├── login.component.html
+    │       │   │   │   └── login.component.scss
+    │       │   │   ├── register/
+    │       │   │   │   ├── register.component.ts
+    │       │   │   │   ├── register.component.html
+    │       │   │   │   └── register.component.scss
+    │       │   │   └── recover-password/
+    │       │   │       ├── recover-password.component.ts
+    │       │   │       ├── recover-password.component.html
+    │       │   │       └── recover-password.component.scss
+    │       │   └── auth.routes.ts
+    │       │
+    │       ├── workspace/                 ← Paquete 2
+    │       │   ├── pages/
+    │       │   │   ├── project-list/
+    │       │   │   │   ├── project-list.component.ts
+    │       │   │   │   ├── project-list.component.html
+    │       │   │   │   └── project-list.component.scss
+    │       │   │   ├── project-detail/
+    │       │   │   │   ├── project-detail.component.ts
+    │       │   │   │   ├── project-detail.component.html
+    │       │   │   │   └── project-detail.component.scss
+    │       │   │   └── collaborators/
+    │       │   │       ├── collaborators.component.ts
+    │       │   │       ├── collaborators.component.html
+    │       │   │       └── collaborators.component.scss
+    │       │   ├── services/
+    │       │   │   └── workspace.service.ts  ← llama al backend
+    │       │   └── workspace.routes.ts
+    │       │
+    │       ├── canvas/                    ← Paquete 3 — el más importante
+    │       │   ├── pages/
+    │       │   │   └── editor/
+    │       │   │       ├── editor.component.ts
+    │       │   │       ├── editor.component.html
+    │       │   │       └── editor.component.scss
+    │       │   ├── components/
+    │       │   │   ├── toolbar/           ← herramientas del lienzo
+    │       │   │   │   ├── toolbar.component.ts
+    │       │   │   │   ├── toolbar.component.html
+    │       │   │   │   └── toolbar.component.scss
+    │       │   │   ├── chat-panel/        ← CU-23 chat del proyecto
+    │       │   │   │   ├── chat-panel.component.ts
+    │       │   │   │   ├── chat-panel.component.html
+    │       │   │   │   └── chat-panel.component.scss
+    │       │   │   ├── collaborators-cursors/  ← cursores en tiempo real
+    │       │   │   │   ├── collaborators-cursors.component.ts
+    │       │   │   │   └── collaborators-cursors.component.html
+    │       │   │   └── ia-panel/          ← chat con IA
+    │       │   │       ├── ia-panel.component.ts
+    │       │   │       ├── ia-panel.component.html
+    │       │   │       └── ia-panel.component.scss
+    │       │   ├── services/
+    │       │   │   ├── canvas.service.ts      ← AntV X6, nodos, relaciones
+    │       │   │   ├── yjs.service.ts         ← CRDTs, sincronización
+    │       │   │   └── ia.service.ts          ← llama al backend IA
+    │       │   └── canvas.routes.ts
+    │       │
+    │       └── interoperability/          ← Paquete 4
+    │           ├── components/
+    │           │   └── codegen-config/    ← CU-27 configurar transpilación
+    │           │       ├── codegen-config.component.ts
+    │           │       ├── codegen-config.component.html
+    │           │       └── codegen-config.component.scss
+    │           ├── services/
+    │           │   └── interoperability.service.ts  ← import/export XMI, generar código
+    │           └── interoperability.routes.ts
+    │
+    └── environments/
+        ├── environment.ts           ← local
+        └── environment.production.ts ← producción
+
+
+Entonces la estructura correcta sería
+core/
+└── services/
+    └── auth.service.ts        ← estado global: token, usuario actual, isLoggedIn
+
+modules/
+└── auth/
+    ├── services/
+    │   └── auth-api.service.ts ← llamadas HTTP al backend
+    └── pages/
+        ├── login/
+        ├── register/
+        └── recover-password/
