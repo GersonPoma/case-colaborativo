@@ -1,0 +1,35 @@
+# ===== SECRETOS =====
+.env
+*.env
+
+# ===== JAVA / SPRING BOOT =====
+target/
+*.jar
+*.class
+.mvn/
+!**/mvn/wrapper/maven-wrapper.jar
+
+# ===== PYTHON =====
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+*.egg-info/
+
+# ===== NODE / ANGULAR =====
+node_modules/
+dist/
+.angular/
+
+# ===== DOCKER =====
+docker-compose.override.yml
+
+# ===== IDEs =====
+.idea/
+.vscode/
+*.iml
+
+# ===== SISTEMA =====
+.DS_Store
+Thumbs.db
