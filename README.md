@@ -4,28 +4,139 @@ case-colaborativo/
 ├── README.md
 ├── .gitignore
 ├── .env.example
-├── docker-compose.yml
+├── docker-compose.yml              ← orquestador maestro
 │
 ├── frontend-angular/
 │   ├── Dockerfile
 │   ├── docker-compose.yml
+│   ├── nginx.conf
+│   ├── angular.json
+│   ├── package.json
+│   ├── tsconfig.json
 │   └── src/
+│       ├── main.ts
+│       ├── index.html
+│       └── app/
+│           ├── app.component.ts
+│           ├── app.config.ts
+│           ├── app.routes.ts
+│           ├── core/
+│           │   ├── guards/
+│           │   │   └── auth.guard.ts
+│           │   ├── interceptors/
+│           │   │   └── auth.interceptor.ts
+│           │   ├── services/
+│           │   │   ├── auth.service.ts
+│           │   │   └── websocket.service.ts
+│           │   └── models/
+│           │       ├── user.model.ts
+│           │       ├── project.model.ts
+│           │       └── diagram.model.ts
+│           ├── shared/
+│           │   ├── components/
+│           │   │   ├── navbar/
+│           │   │   ├── sidebar/
+│           │   │   ├── modal/
+│           │   │   └── loader/
+│           │   └── pipes/
+│           │       └── date-format.pipe.ts
+│           └── modules/
+│               ├── auth/
+│               │   ├── pages/
+│               │   │   ├── login/
+│               │   │   ├── register/
+│               │   │   └── recover-password/
+│               │   ├── services/
+│               │   │   └── auth-api.service.ts
+│               │   └── auth.routes.ts
+│               ├── workspace/
+│               │   ├── pages/
+│               │   │   ├── project-list/
+│               │   │   ├── project-detail/
+│               │   │   └── collaborators/
+│               │   ├── services/
+│               │   │   └── workspace.service.ts
+│               │   └── workspace.routes.ts
+│               ├── canvas/
+│               │   ├── pages/
+│               │   │   └── editor/
+│               │   ├── components/
+│               │   │   ├── toolbar/
+│               │   │   ├── chat-panel/
+│               │   │   ├── collaborators-cursors/
+│               │   │   └── ia-panel/
+│               │   ├── services/
+│               │   │   ├── canvas.service.ts
+│               │   │   ├── yjs.service.ts
+│               │   │   └── ia.service.ts
+│               │   └── canvas.routes.ts
+│               └── interoperability/
+│                   ├── components/
+│                   │   └── codegen-config/
+│                   ├── services/
+│                   │   └── interoperability.service.ts
+│                   └── interoperability.routes.ts
 │
 └── backend/
     ├── Dockerfile
+    ├── docker-compose.yml
     ├── requirements.txt
     ├── alembic.ini
     ├── .env
+    ├── .env.example
     └── app/
+        ├── __init__.py
         ├── main.py
         ├── config/
-        ├── models/
-        ├── schemas/
-        ├── routers/
-        ├── services/
-        ├── templates/
+        │   ├── __init__.py
+        │   ├── database.py
+        │   └── settings.py
+        ├── core/
+        │   ├── __init__.py
+        │   ├── security.py
+        │   ├── dependencies.py
+        │   ├── exceptions.py
+        │   └── base_model.py
+        ├── modules/
+        │   ├── __init__.py
+        │   ├── auth/
+        │   │   ├── __init__.py
+        │   │   ├── model.py
+        │   │   ├── schema.py
+        │   │   ├── repository.py
+        │   │   ├── service.py
+        │   │   └── router.py
+        │   ├── workspace/
+        │   │   ├── __init__.py
+        │   │   ├── model.py
+        │   │   ├── schema.py
+        │   │   ├── repository.py
+        │   │   ├── service.py
+        │   │   └── router.py
+        │   ├── canvas/
+        │   │   ├── __init__.py
+        │   │   ├── schema.py
+        │   │   ├── repository.py
+        │   │   ├── service.py
+        │   │   └── router.py
+        │   └── interoperability/
+        │       ├── __init__.py
+        │       ├── model.py
+        │       ├── schema.py
+        │       ├── repository.py
+        │       ├── service.py
+        │       └── router.py
         ├── websocket/
+        │   ├── __init__.py
+        │   ├── manager.py
+        │   └── router.py
+        ├── templates/
+        │   ├── Entity.java.j2
+        │   ├── Repository.java.j2
+        │   ├── Service.java.j2
+        │   └── Controller.java.j2
         └── migrations/
+            └── versions/
 
 
 estructura del backend
