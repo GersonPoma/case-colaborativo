@@ -1,0 +1,17 @@
+# ===== NODE =====
+node_modules/
+dist/
+.angular/
+
+# ===== GIT =====
+.git
+.gitignore
+
+# ===== IDEs =====
+.idea/
+.vscode/
+*.iml
+
+# ===== SISTEMA =====
+.DS_Store
+Thumbs.db
