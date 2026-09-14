@@ -1,14 +1,12 @@
 import enum
 from datetime import datetime, timezone
 
-from sqlalchemy import JSON, Column, DateTime, Enum, ForeignKey, Identity, Integer, String, Text
+from sqlalchemy import Column, DateTime, Enum, ForeignKey, Identity, Integer, String, Text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
 from app.config.database import Base
 from app.core.base_model import BaseAuditable
-
-JSONB_VARIANT = JSON().with_variant(JSONB(), "postgresql")
 
 
 class RolColaborador(str, enum.Enum):
@@ -22,7 +20,7 @@ class Proyecto(BaseAuditable, Base):
     id = Column(Integer, Identity(), primary_key=True)
     nombre = Column(String(150), nullable=False)
     descripcion = Column(Text, nullable=True)
-    estado_lienzo = Column(JSONB_VARIANT, nullable=True)
+    estado_lienzo = Column(JSONB, nullable=True)
     id_dueno = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
 
     dueno = relationship("Usuario")
@@ -50,7 +48,7 @@ class HistorialVersiones(Base):
 
     id = Column(Integer, Identity(), primary_key=True)
     id_proyecto = Column(Integer, ForeignKey("proyectos.id"), nullable=False)
-    snapshot_lienzo = Column(JSONB_VARIANT, nullable=False)
+    snapshot_lienzo = Column(JSONB, nullable=False)
     creado_por = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
     fecha = Column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False
