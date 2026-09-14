@@ -68,19 +68,24 @@ async def canvas_websocket(
         await websocket.close(code=4401)
         return
 
+    usuario_id = usuario.id
+
     proyecto_service = ProyectoService(db)
     try:
         proyecto = await proyecto_service.obtener(proyecto_id)
-        await proyecto_service.verificar_miembro(proyecto, usuario.id)
+        await proyecto_service.verificar_miembro(proyecto, usuario_id)
     except AppException:
         await websocket.close(code=4403)
         return
 
     puede_editar = True
     try:
-        await proyecto_service.verificar_editor(proyecto, usuario.id)
+        await proyecto_service.verificar_editor(proyecto, usuario_id)
     except AppException:
         puede_editar = False
+
+    # cierra la transacción de los checks de arriba para no dejarla abierta mientras espera mensajes
+    await db.rollback()
 
     canvas_service = CanvasService(db)
 
@@ -112,7 +117,7 @@ async def canvas_websocket(
                 await websocket.send_json(MensajeError(error=e.message).model_dump())
                 continue
 
-            salida = MensajeSaliente(accion=mensaje.accion, datos=resultado, usuario_id=usuario.id)
+            salida = MensajeSaliente(accion=mensaje.accion, datos=resultado, usuario_id=usuario_id)
             await manager.difundir(proyecto_id, salida.model_dump(mode="json"), excluir=websocket)
     except WebSocketDisconnect:
         pass
