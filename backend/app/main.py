@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 from app.config.settings import settings
 from app.core.exceptions import AppException, ConflictError, ForbiddenError, NotFoundError, UnauthorizedError
 from app.modules.auth.router import router as auth_router
+from app.modules.canvas.router import router as canvas_router
 from app.modules.workspace.router import router as workspace_router
 from app.websocket.router import router as canvas_websocket_router
 
@@ -39,6 +40,7 @@ async def app_exception_handler(request: Request, exc: AppException):
 # ===== ROUTERS =====
 app.include_router(auth_router)
 app.include_router(workspace_router)
+app.include_router(canvas_router)
 app.include_router(canvas_websocket_router)
 
 # ===== HEALTH CHECK =====
