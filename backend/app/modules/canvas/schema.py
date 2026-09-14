@@ -86,6 +86,11 @@ class EstadoLienzo(BaseModel):
     relaciones: dict[str, Relacion] = {}
 
 
+class GuardarLienzo(BaseModel):
+    clases: dict[str, Clase] = {}
+    relaciones: dict[str, Relacion] = {}
+
+
 # payloads de entrada por acción (van dentro de MensajeEntrante.datos)
 
 
