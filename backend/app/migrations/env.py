@@ -6,9 +6,14 @@ from sqlalchemy import engine_from_config, pool
 from app.config.database import Base
 from app.config.settings import settings
 
-# Importa aquí los modelos de cada módulo para que Alembic los detecte
-# en el autogenerate, ej:
-# from app.modules.auth.model import User
+# Importa aquí los modelos de cada módulo para que Alembic los detecte en el autogenerate
+from app.modules.auth.model import Perfil, Usuario  # noqa: F401
+from app.modules.workspace.model import (  # noqa: F401
+    Colaborador,
+    HistorialVersiones,
+    MensajeChat,
+    Proyecto,
+)
 
 config = context.config
 
