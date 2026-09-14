@@ -8,6 +8,12 @@ from app.core.security import decode_access_token
 from app.modules.auth.model import Usuario
 from app.modules.auth.repository import UsuarioRepository
 from app.modules.auth.service import PerfilService, UsuarioService
+from app.modules.workspace.service import (
+    ColaboradorService,
+    HistorialVersionesService,
+    MensajeChatService,
+    ProyectoService,
+)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
@@ -18,6 +24,24 @@ async def get_usuario_service(db: AsyncSession = Depends(get_db)) -> UsuarioServ
 
 async def get_perfil_service(db: AsyncSession = Depends(get_db)) -> PerfilService:
     return PerfilService(db)
+
+
+async def get_proyecto_service(db: AsyncSession = Depends(get_db)) -> ProyectoService:
+    return ProyectoService(db)
+
+
+async def get_colaborador_service(db: AsyncSession = Depends(get_db)) -> ColaboradorService:
+    return ColaboradorService(db)
+
+
+async def get_historial_versiones_service(
+    db: AsyncSession = Depends(get_db),
+) -> HistorialVersionesService:
+    return HistorialVersionesService(db)
+
+
+async def get_mensaje_chat_service(db: AsyncSession = Depends(get_db)) -> MensajeChatService:
+    return MensajeChatService(db)
 
 
 async def get_current_user(

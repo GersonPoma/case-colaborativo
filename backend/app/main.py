@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 from app.config.settings import settings
 from app.core.exceptions import AppException, ConflictError, ForbiddenError, NotFoundError, UnauthorizedError
 from app.modules.auth.router import router as auth_router
+from app.modules.workspace.router import router as workspace_router
 
 app = FastAPI(
     title="CASE Colaborativo",
@@ -36,6 +37,7 @@ async def app_exception_handler(request: Request, exc: AppException):
 
 # ===== ROUTERS =====
 app.include_router(auth_router)
+app.include_router(workspace_router)
 
 # ===== HEALTH CHECK =====
 @app.get("/health")
