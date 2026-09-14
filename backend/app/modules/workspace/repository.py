@@ -36,9 +36,9 @@ class ColaboradorRepository:
 
     async def get(self, id_proyecto: int, id_usuario: int) -> Colaborador | None:
         result = await self.db.execute(
-            select(Colaborador).where(
-                Colaborador.id_proyecto == id_proyecto, Colaborador.id_usuario == id_usuario
-            )
+            select(Colaborador)
+            .options(selectinload(Colaborador.usuario))
+            .where(Colaborador.id_proyecto == id_proyecto, Colaborador.id_usuario == id_usuario)
         )
         return result.scalar_one_or_none()
 
