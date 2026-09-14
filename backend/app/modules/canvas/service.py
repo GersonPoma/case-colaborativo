@@ -29,6 +29,9 @@ class CanvasService:
         if proyecto is None:
             raise NotFoundError("Proyecto no encontrado")
 
+        # recarga por si otro usuario conectado al mismo proyecto guardó cambios
+        await self.db.refresh(proyecto)
+
         actual = proyecto.estado_lienzo
         if actual:
             # copia superficial: para que SQLAlchemy detecte el cambio hace falta
