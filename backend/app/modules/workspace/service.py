@@ -3,7 +3,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.exceptions import ConflictError, ForbiddenError, NotFoundError
 from app.core.pagination import ParametrosPaginacion
 from app.modules.auth.repository import UsuarioRepository
-from app.modules.workspace.model import Colaborador, HistorialVersiones, MensajeChat, Proyecto
+from app.modules.workspace.model import (
+    Colaborador,
+    HistorialVersiones,
+    MensajeChat,
+    Proyecto,
+    RolColaborador,
+)
 from app.modules.workspace.repository import (
     ColaboradorRepository,
     HistorialVersionesRepository,
@@ -52,6 +58,13 @@ class ProyectoService:
         colaborador = await self.colaborador_repository.get(proyecto.id, id_usuario)
         if colaborador is None:
             raise ForbiddenError("No tienes acceso a este proyecto")
+
+    async def verificar_editor(self, proyecto: Proyecto, id_usuario: int) -> None:
+        if proyecto.id_dueno == id_usuario:
+            return
+        colaborador = await self.colaborador_repository.get(proyecto.id, id_usuario)
+        if colaborador is None or colaborador.rol != RolColaborador.EDITOR:
+            raise ForbiddenError("No tienes permisos de edición en este proyecto")
 
     async def eliminar(self, proyecto_id: int, id_usuario: int) -> None:
         proyecto = await self.obtener(proyecto_id)
