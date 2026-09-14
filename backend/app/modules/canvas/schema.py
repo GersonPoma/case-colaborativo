@@ -19,7 +19,7 @@ class AccionCanvas(str, enum.Enum):
     ALINEAR_NODOS = "ALINEAR_NODOS"
 
 
-class VisibilidadMetodo(str, enum.Enum):
+class Visibilidad(str, enum.Enum):
     PUBLICO = "PUBLICO"
     PRIVADO = "PRIVADO"
     PROTEGIDO = "PROTEGIDO"
@@ -40,6 +40,7 @@ class Atributo(BaseModel):
     nombre: str
     tipo: str
     es_pk: bool = False
+    visibilidad: Visibilidad = Visibilidad.PRIVADO
     orden: int = 0
 
 
@@ -53,7 +54,7 @@ class Metodo(BaseModel):
     nombre: str
     tipo_retorno: str
     parametros: list[ParametroMetodo] = []
-    visibilidad: VisibilidadMetodo = VisibilidadMetodo.PUBLICO
+    visibilidad: Visibilidad = Visibilidad.PUBLICO
     orden: int = 0
 
 
@@ -108,6 +109,7 @@ class AgregarAtributo(BaseModel):
     nombre: str
     tipo: str
     es_pk: bool = False
+    visibilidad: Visibilidad = Visibilidad.PRIVADO
 
 
 class EditarAtributo(BaseModel):
@@ -116,6 +118,7 @@ class EditarAtributo(BaseModel):
     nombre: str
     tipo: str
     es_pk: bool = False
+    visibilidad: Visibilidad = Visibilidad.PRIVADO
 
 
 class EliminarAtributo(BaseModel):
@@ -128,7 +131,7 @@ class AgregarMetodo(BaseModel):
     nombre: str
     tipo_retorno: str
     parametros: list[ParametroMetodo] = []
-    visibilidad: VisibilidadMetodo = VisibilidadMetodo.PUBLICO
+    visibilidad: Visibilidad = Visibilidad.PUBLICO
 
 
 class EditarMetodo(BaseModel):
@@ -137,7 +140,7 @@ class EditarMetodo(BaseModel):
     nombre: str
     tipo_retorno: str
     parametros: list[ParametroMetodo] = []
-    visibilidad: VisibilidadMetodo = VisibilidadMetodo.PUBLICO
+    visibilidad: Visibilidad = Visibilidad.PUBLICO
 
 
 class EliminarMetodo(BaseModel):

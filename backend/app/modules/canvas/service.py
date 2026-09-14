@@ -114,6 +114,7 @@ class CanvasService:
             "nombre": datos.nombre,
             "tipo": datos.tipo,
             "es_pk": datos.es_pk,
+            "visibilidad": datos.visibilidad.value,
             "orden": len(clase["atributos"]),
         }
         clase = {**clase, "atributos": {**clase["atributos"], atributo_id: atributo}}
@@ -135,6 +136,7 @@ class CanvasService:
             "nombre": datos.nombre,
             "tipo": datos.tipo,
             "es_pk": datos.es_pk,
+            "visibilidad": datos.visibilidad.value,
         }
         clase = {**clase, "atributos": {**clase["atributos"], datos.atributo_id: atributo}}
         estado["clases"] = {**estado["clases"], datos.clase_id: clase}
