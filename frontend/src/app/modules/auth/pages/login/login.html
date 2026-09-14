@@ -10,12 +10,26 @@
     <input id="username" type="text" formControlName="username" autocomplete="username" />
 
     <label for="password">Contraseña</label>
-    <input
-      id="password"
-      type="password"
-      formControlName="password"
-      autocomplete="current-password"
-    />
+    <div class="password-field">
+      <input
+        id="password"
+        [type]="mostrarPassword() ? 'text' : 'password'"
+        formControlName="password"
+        autocomplete="current-password"
+      />
+      <button
+        type="button"
+        class="toggle-password"
+        (click)="alternarMostrarPassword()"
+        [attr.aria-label]="mostrarPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+      >
+        @if (mostrarPassword()) {
+          <svg lucideEyeOff [size]="18"></svg>
+        } @else {
+          <svg lucideEye [size]="18"></svg>
+        }
+      </button>
+    </div>
 
     <button type="submit" [disabled]="cargando()">
       {{ cargando() ? 'Ingresando...' : 'Ingresar' }}

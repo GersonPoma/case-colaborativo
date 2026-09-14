@@ -1,12 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { LucideEye, LucideEyeOff } from '@lucide/angular';
 import { AuthService } from '../../../../core/services/auth.service';
 import { AuthApiService } from '../../services/auth-api.service';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, LucideEye, LucideEyeOff],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
@@ -18,6 +19,7 @@ export class Login {
 
   readonly cargando = signal(false);
   readonly error = signal<string | null>(null);
+  readonly mostrarPassword = signal(false);
 
   readonly formulario = this.fb.nonNullable.group({
     username: ['', [Validators.required, Validators.minLength(3)]],
@@ -49,6 +51,10 @@ export class Login {
         this.error.set(this.obtenerMensajeError(err));
       },
     });
+  }
+
+  alternarMostrarPassword(): void {
+    this.mostrarPassword.update((valor) => !valor);
   }
 
   private obtenerMensajeError(err: unknown): string {
