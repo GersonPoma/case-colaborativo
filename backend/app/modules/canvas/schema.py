@@ -10,10 +10,19 @@ class AccionCanvas(str, enum.Enum):
     AGREGAR_ATRIBUTO = "AGREGAR_ATRIBUTO"
     EDITAR_ATRIBUTO = "EDITAR_ATRIBUTO"
     ELIMINAR_ATRIBUTO = "ELIMINAR_ATRIBUTO"
+    AGREGAR_METODO = "AGREGAR_METODO"
+    EDITAR_METODO = "EDITAR_METODO"
+    ELIMINAR_METODO = "ELIMINAR_METODO"
     TRAZAR_RELACION = "TRAZAR_RELACION"
     ELIMINAR_RELACION = "ELIMINAR_RELACION"
     MODIFICAR_UI = "MODIFICAR_UI"
     ALINEAR_NODOS = "ALINEAR_NODOS"
+
+
+class VisibilidadMetodo(str, enum.Enum):
+    PUBLICO = "PUBLICO"
+    PRIVADO = "PRIVADO"
+    PROTEGIDO = "PROTEGIDO"
 
 
 # estructura del estado_lienzo (para referencia / validación de salida)
@@ -34,10 +43,25 @@ class Atributo(BaseModel):
     orden: int = 0
 
 
+class ParametroMetodo(BaseModel):
+    nombre: str
+    tipo: str
+
+
+class Metodo(BaseModel):
+    id: str
+    nombre: str
+    tipo_retorno: str
+    parametros: list[ParametroMetodo] = []
+    visibilidad: VisibilidadMetodo = VisibilidadMetodo.PUBLICO
+    orden: int = 0
+
+
 class Clase(BaseModel):
     id: str
     nombre: str
     atributos: dict[str, Atributo] = {}
+    metodos: dict[str, Metodo] = {}
     ui: UIClase
 
 
@@ -97,6 +121,28 @@ class EditarAtributo(BaseModel):
 class EliminarAtributo(BaseModel):
     clase_id: str
     atributo_id: str
+
+
+class AgregarMetodo(BaseModel):
+    clase_id: str
+    nombre: str
+    tipo_retorno: str
+    parametros: list[ParametroMetodo] = []
+    visibilidad: VisibilidadMetodo = VisibilidadMetodo.PUBLICO
+
+
+class EditarMetodo(BaseModel):
+    clase_id: str
+    metodo_id: str
+    nombre: str
+    tipo_retorno: str
+    parametros: list[ParametroMetodo] = []
+    visibilidad: VisibilidadMetodo = VisibilidadMetodo.PUBLICO
+
+
+class EliminarMetodo(BaseModel):
+    clase_id: str
+    metodo_id: str
 
 
 class TrazarRelacion(BaseModel):

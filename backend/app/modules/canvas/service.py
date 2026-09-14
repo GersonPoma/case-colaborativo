@@ -5,12 +5,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.exceptions import NotFoundError
 from app.modules.canvas.schema import (
     AgregarAtributo,
+    AgregarMetodo,
     AlinearNodos,
     CrearClase,
     EditarAtributo,
     EditarClase,
+    EditarMetodo,
     EliminarAtributo,
     EliminarClase,
+    EliminarMetodo,
     EliminarRelacion,
     ModificarUI,
     TrazarRelacion,
@@ -37,6 +40,10 @@ class CanvasService:
             # copia superficial: para que SQLAlchemy detecte el cambio hace falta
             # reasignar un objeto nuevo, mutar el dict existente in-place no se persiste
             estado = dict(actual)
+            # compatibilidad con clases guardadas antes de que existiera "metodos"
+            estado["clases"] = {
+                cid: {"metodos": {}, **c} for cid, c in estado["clases"].items()
+            }
         else:
             estado = {"diagrama_id": str(proyecto.id), "clases": {}, "relaciones": {}}
 
@@ -54,6 +61,7 @@ class CanvasService:
             "id": clase_id,
             "nombre": datos.nombre,
             "atributos": {},
+            "metodos": {},
             "ui": {"x": datos.x, "y": datos.y, "ancho": 220, "color": "#e3f2fd"},
         }
         estado["clases"] = {**estado["clases"], clase_id: clase}
@@ -148,6 +156,64 @@ class CanvasService:
 
         await self._guardar_estado(proyecto, estado)
         return {"clase_id": datos.clase_id, "atributo_id": datos.atributo_id}
+
+    async def agregar_metodo(self, proyecto_id: int, datos: AgregarMetodo) -> dict:
+        proyecto, estado = await self._obtener_estado(proyecto_id)
+
+        clase = estado["clases"].get(datos.clase_id)
+        if clase is None:
+            raise NotFoundError("Clase no encontrada")
+
+        metodo_id = str(uuid.uuid4())
+        metodo = {
+            "id": metodo_id,
+            "nombre": datos.nombre,
+            "tipo_retorno": datos.tipo_retorno,
+            "parametros": [p.model_dump() for p in datos.parametros],
+            "visibilidad": datos.visibilidad.value,
+            "orden": len(clase["metodos"]),
+        }
+        clase = {**clase, "metodos": {**clase["metodos"], metodo_id: metodo}}
+        estado["clases"] = {**estado["clases"], datos.clase_id: clase}
+
+        await self._guardar_estado(proyecto, estado)
+        return {"clase_id": datos.clase_id, "metodo": metodo}
+
+    async def editar_metodo(self, proyecto_id: int, datos: EditarMetodo) -> dict:
+        proyecto, estado = await self._obtener_estado(proyecto_id)
+
+        clase = estado["clases"].get(datos.clase_id)
+        if clase is None or datos.metodo_id not in clase["metodos"]:
+            raise NotFoundError("Método no encontrado")
+
+        metodo_anterior = clase["metodos"][datos.metodo_id]
+        metodo = {
+            **metodo_anterior,
+            "nombre": datos.nombre,
+            "tipo_retorno": datos.tipo_retorno,
+            "parametros": [p.model_dump() for p in datos.parametros],
+            "visibilidad": datos.visibilidad.value,
+        }
+        clase = {**clase, "metodos": {**clase["metodos"], datos.metodo_id: metodo}}
+        estado["clases"] = {**estado["clases"], datos.clase_id: clase}
+
+        await self._guardar_estado(proyecto, estado)
+        return {"clase_id": datos.clase_id, "metodo": metodo}
+
+    async def eliminar_metodo(self, proyecto_id: int, datos: EliminarMetodo) -> dict:
+        proyecto, estado = await self._obtener_estado(proyecto_id)
+
+        clase = estado["clases"].get(datos.clase_id)
+        if clase is None or datos.metodo_id not in clase["metodos"]:
+            raise NotFoundError("Método no encontrado")
+
+        metodos = dict(clase["metodos"])
+        del metodos[datos.metodo_id]
+        clase = {**clase, "metodos": metodos}
+        estado["clases"] = {**estado["clases"], datos.clase_id: clase}
+
+        await self._guardar_estado(proyecto, estado)
+        return {"clase_id": datos.clase_id, "metodo_id": datos.metodo_id}
 
     async def trazar_relacion(self, proyecto_id: int, datos: TrazarRelacion) -> dict:
         proyecto, estado = await self._obtener_estado(proyecto_id)
