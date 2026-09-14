@@ -15,6 +15,7 @@ from app.modules.canvas.schema import (
     EliminarClase,
     EliminarMetodo,
     EliminarRelacion,
+    GuardarLienzo,
     ModificarUI,
     TrazarRelacion,
 )
@@ -52,6 +53,23 @@ class CanvasService:
     async def _guardar_estado(self, proyecto: Proyecto, estado: dict) -> None:
         proyecto.estado_lienzo = estado
         await self.db.commit()
+
+    async def obtener_lienzo(self, proyecto_id: int) -> dict:
+        _, estado = await self._obtener_estado(proyecto_id)
+        return estado
+
+    async def guardar_lienzo(self, proyecto_id: int, datos: GuardarLienzo) -> dict:
+        proyecto = await self.proyecto_repository.get_by_id(proyecto_id)
+        if proyecto is None:
+            raise NotFoundError("Proyecto no encontrado")
+
+        estado = {
+            "diagrama_id": str(proyecto.id),
+            "clases": {cid: c.model_dump(mode="json") for cid, c in datos.clases.items()},
+            "relaciones": {rid: r.model_dump(mode="json") for rid, r in datos.relaciones.items()},
+        }
+        await self._guardar_estado(proyecto, estado)
+        return estado
 
     async def crear_clase(self, proyecto_id: int, datos: CrearClase) -> dict:
         proyecto, estado = await self._obtener_estado(proyecto_id)
