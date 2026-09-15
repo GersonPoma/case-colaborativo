@@ -1,0 +1,48 @@
+h2 {
+  font-size: 1.2rem;
+  margin: 0 0 0.5rem;
+  text-align: center;
+}
+
+.descripcion {
+  font-size: 0.85rem;
+  color: #666;
+  text-align: center;
+  margin: 0 0 1.25rem;
+  line-height: 1.4;
+}
+
+.acciones {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.boton {
+  display: block;
+  text-align: center;
+  padding: 0.7rem;
+  border-radius: 6px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.boton-primario {
+  background: #4a6cf7;
+  color: #fff;
+
+  &:hover {
+    background: #3a5ce0;
+  }
+}
+
+.boton-secundario {
+  background: #fff;
+  color: #4a6cf7;
+  border: 1px solid #4a6cf7;
+
+  &:hover {
+    background: #f0f3ff;
+  }
+}

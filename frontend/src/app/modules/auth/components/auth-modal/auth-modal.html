@@ -1,1 +1,13 @@
-<p>auth-modal works!</p>
+<app-modal [abierto]="abierto()" (cerrado)="cerrar()">
+  <h2>Guarda tu proyecto</h2>
+  <p class="descripcion">
+    Tu diagrama no se va a perder — creá una cuenta o iniciá sesión para guardarlo.
+  </p>
+
+  <div class="acciones">
+    <a routerLink="/iniciar-sesion" class="boton boton-primario" (click)="cerrar()">
+      Iniciar sesión
+    </a>
+    <a routerLink="/registro" class="boton boton-secundario" (click)="cerrar()"> Crear cuenta </a>
+  </div>
+</app-modal>
