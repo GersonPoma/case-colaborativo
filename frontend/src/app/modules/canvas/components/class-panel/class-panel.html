@@ -1,0 +1,162 @@
+<div class="panel">
+  <header class="panel-header">
+    @if (editandoNombre()) {
+      <form class="form-nombre" [formGroup]="formNombre" (ngSubmit)="guardarNombre()">
+        <input type="text" formControlName="nombre" autocomplete="off" />
+        <button type="submit" class="boton-texto">Guardar</button>
+      </form>
+    } @else {
+      <h3 (click)="!soloLectura() && iniciarEdicionNombre()">{{ clase().nombre }}</h3>
+    }
+    <button type="button" class="boton-cerrar" (click)="cerrar.emit()">×</button>
+  </header>
+
+  <section class="bloque">
+    <div class="bloque-header">
+      <h4>Atributos</h4>
+      @if (!soloLectura() && editandoAtributoId() === null) {
+        <button type="button" class="boton-texto" (click)="iniciarNuevoAtributo()">+ Agregar</button>
+      }
+    </div>
+
+    @if (editandoAtributoId() === 'nuevo') {
+      <form class="form-miembro" [formGroup]="formAtributo" (ngSubmit)="guardarAtributo()">
+        <input type="text" formControlName="nombre" placeholder="nombre" autocomplete="off" />
+        <input type="text" formControlName="tipo" placeholder="tipo (opcional)" autocomplete="off" />
+        <select formControlName="visibilidad">
+          <option value="PUBLICO">+ público</option>
+          <option value="PRIVADO">- privado</option>
+          <option value="PROTEGIDO"># protegido</option>
+          <option value="PAQUETE">~ paquete</option>
+        </select>
+        <label class="check"><input type="checkbox" formControlName="es_pk" /> PK</label>
+        <div class="acciones-miembro">
+          <button type="button" class="boton-texto" (click)="cancelarAtributo()">Cancelar</button>
+          <button type="submit" class="boton-primario-sm">Agregar</button>
+        </div>
+      </form>
+    }
+
+    <ul class="lista-miembros">
+      @for (atributo of atributosOrdenados(); track atributo.id) {
+        @if (editandoAtributoId() === atributo.id) {
+          <li>
+            <form class="form-miembro" [formGroup]="formAtributo" (ngSubmit)="guardarAtributo()">
+              <input type="text" formControlName="nombre" placeholder="nombre" autocomplete="off" />
+              <input type="text" formControlName="tipo" placeholder="tipo (opcional)" autocomplete="off" />
+              <select formControlName="visibilidad">
+                <option value="PUBLICO">+ público</option>
+                <option value="PRIVADO">- privado</option>
+                <option value="PROTEGIDO"># protegido</option>
+                <option value="PAQUETE">~ paquete</option>
+              </select>
+              <label class="check"><input type="checkbox" formControlName="es_pk" /> PK</label>
+              <div class="acciones-miembro">
+                <button type="button" class="boton-texto" (click)="cancelarAtributo()">Cancelar</button>
+                <button type="submit" class="boton-primario-sm">Guardar</button>
+              </div>
+            </form>
+          </li>
+        } @else {
+          <li class="miembro">
+            <span class="miembro-texto">
+              {{ simboloVisibilidad(atributo.visibilidad) }} {{ atributo.nombre
+              }}{{ atributo.tipo ? ': ' + atributo.tipo : '' }}{{ atributo.es_pk ? ' {PK}' : '' }}
+            </span>
+            @if (!soloLectura()) {
+              <span class="miembro-acciones">
+                <button type="button" class="boton-icono" (click)="iniciarEdicionAtributo(atributo)">✎</button>
+                <button type="button" class="boton-icono" (click)="eliminarAtributo(atributo)">🗑</button>
+              </span>
+            }
+          </li>
+        }
+      }
+    </ul>
+  </section>
+
+  <section class="bloque">
+    <div class="bloque-header">
+      <h4>Métodos</h4>
+      @if (!soloLectura() && editandoMetodoId() === null) {
+        <button type="button" class="boton-texto" (click)="iniciarNuevoMetodo()">+ Agregar</button>
+      }
+    </div>
+
+    @if (editandoMetodoId() !== null) {
+      <form class="form-miembro" [formGroup]="formMetodo" (ngSubmit)="guardarMetodo()">
+        <input type="text" formControlName="nombre" placeholder="nombre" autocomplete="off" />
+        <input type="text" formControlName="tipo_retorno" placeholder="retorno (vacío = void)" autocomplete="off" />
+        <select formControlName="visibilidad">
+          <option value="PUBLICO">+ público</option>
+          <option value="PRIVADO">- privado</option>
+          <option value="PROTEGIDO"># protegido</option>
+          <option value="PAQUETE">~ paquete</option>
+        </select>
+
+        <div class="parametros">
+          <span class="parametros-titulo">Parámetros</span>
+          @for (param of parametrosMetodo(); track $index) {
+            <div class="parametro-fila">
+              <input
+                type="text"
+                placeholder="nombre"
+                [value]="param.nombre"
+                (input)="actualizarParametro($index, 'nombre', $any($event.target).value)"
+              />
+              <input
+                type="text"
+                placeholder="tipo"
+                [value]="param.tipo"
+                (input)="actualizarParametro($index, 'tipo', $any($event.target).value)"
+              />
+              <button type="button" class="boton-icono" (click)="quitarParametro($index)">×</button>
+            </div>
+          }
+          <button type="button" class="boton-texto" (click)="agregarParametro()">+ Parámetro</button>
+        </div>
+
+        <div class="acciones-miembro">
+          <button type="button" class="boton-texto" (click)="cancelarMetodo()">Cancelar</button>
+          <button type="submit" class="boton-primario-sm">Guardar</button>
+        </div>
+      </form>
+    }
+
+    <ul class="lista-miembros">
+      @for (metodo of metodosOrdenados(); track metodo.id) {
+        @if (editandoMetodoId() !== metodo.id) {
+          <li class="miembro">
+            <span class="miembro-texto">
+              {{ simboloVisibilidad(metodo.visibilidad) }} {{ metodo.nombre }}({{
+                parametrosTexto(metodo)
+              }}): {{ metodo.tipo_retorno || 'void' }}
+            </span>
+            @if (!soloLectura()) {
+              <span class="miembro-acciones">
+                <button type="button" class="boton-icono" (click)="iniciarEdicionMetodo(metodo)">✎</button>
+                <button type="button" class="boton-icono" (click)="eliminarMetodo(metodo)">🗑</button>
+              </span>
+            }
+          </li>
+        }
+      }
+    </ul>
+  </section>
+
+  @if (!soloLectura()) {
+    <button type="button" class="boton-peligro-sm" (click)="eliminarClase()">Eliminar clase</button>
+  }
+</div>
+
+<app-modal [abierto]="mostrarConfirmarEliminar()" ancho="380px" (cerrado)="cancelarEliminarClase()">
+  <h2>Eliminar clase</h2>
+  <p>
+    ¿Eliminar la clase "<strong>{{ clase().nombre }}</strong>"? También se eliminan las relaciones que la
+    involucran. Esta acción no se puede deshacer.
+  </p>
+  <div class="acciones-form">
+    <button type="button" class="boton-secundario" (click)="cancelarEliminarClase()">Cancelar</button>
+    <button type="button" class="boton-peligro" (click)="confirmarEliminarClase()">Eliminar</button>
+  </div>
+</app-modal>
