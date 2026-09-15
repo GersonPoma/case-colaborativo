@@ -172,6 +172,19 @@ class HistorialVersionesService:
         await self.db.commit()
         return historial
 
+    async def crear_version(
+        self, proyecto_id: int, id_usuario_creador: int
+    ) -> HistorialVersiones:
+        proyecto = await self.proyecto_service.obtener(proyecto_id)
+        await self.proyecto_service.verificar_editor(proyecto, id_usuario_creador)
+
+        snapshot = proyecto.estado_lienzo or {
+            "diagrama_id": str(proyecto.id),
+            "clases": {},
+            "relaciones": {},
+        }
+        return await self.crear_snapshot(proyecto_id, snapshot, id_usuario_creador)
+
     async def obtener_lienzo(
         self, proyecto_id: int, id_dueno_solicitante: int, historial_id: int
     ) -> dict:

@@ -145,6 +145,19 @@ async def listar_historial_versiones(
     return construir_pagina(items, total, params)
 
 
+@router.post(
+    "/{proyecto_id}/historial",
+    response_model=HistorialVersionesResumen,
+    status_code=201,
+)
+async def crear_version_historial(
+    proyecto_id: int,
+    usuario: Usuario = Depends(get_current_user),
+    service: HistorialVersionesService = Depends(get_historial_versiones_service),
+):
+    return await service.crear_version(proyecto_id, usuario.id)
+
+
 @router.get("/{proyecto_id}/historial/{historial_id}/lienzo")
 async def obtener_lienzo_historial(
     proyecto_id: int,
