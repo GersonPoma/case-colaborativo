@@ -1,1 +1,83 @@
-<p>collaborators works!</p>
+<div class="page">
+  <a class="volver" [routerLink]="['/proyectos', proyectoId]">← Volver al proyecto</a>
+
+  @if (cargando()) {
+    <p class="estado">Cargando colaboradores...</p>
+  } @else {
+    <header class="page-header">
+      <h1>Colaboradores{{ proyecto() ? ' de ' + proyecto()!.nombre : '' }}</h1>
+    </header>
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+
+    @if (esDueno()) {
+      <form class="formulario-invitar" [formGroup]="formulario" (ngSubmit)="invitar()">
+        <div class="campo">
+          <label for="username">Usuario a invitar</label>
+          <input id="username" type="text" formControlName="username" autocomplete="off" />
+          <p class="field-error">
+            @if (formulario.controls.username.invalid && formulario.controls.username.touched) {
+              Este campo es obligatorio
+            }
+          </p>
+        </div>
+
+        <div class="campo campo-rol">
+          <label for="rol">Rol</label>
+          <select id="rol" formControlName="rol">
+            <option value="LECTOR">Lector</option>
+            <option value="EDITOR">Editor</option>
+          </select>
+          <p class="field-error"></p>
+        </div>
+
+        <div class="campo campo-boton">
+          <label class="label-oculto">Invitar</label>
+          <button type="submit" class="boton-primario" [disabled]="invitando()">
+            {{ invitando() ? 'Invitando...' : 'Invitar' }}
+          </button>
+          <p class="field-error"></p>
+        </div>
+      </form>
+    }
+
+    @if (colaboradores().length === 0) {
+      <p class="vacio">Todavía no hay colaboradores en este proyecto.</p>
+    } @else {
+      <ul class="lista-colaboradores">
+        @for (colaborador of colaboradores(); track colaborador.usuario.id) {
+          <li>
+            <span class="username">{{ colaborador.usuario.username }}</span>
+
+            @if (esDueno()) {
+              <div class="acciones-colaborador">
+                <select
+                  [value]="colaborador.rol"
+                  [disabled]="procesandoUsuarioId() === colaborador.usuario.id"
+                  (change)="cambiarRol(colaborador, $any($event.target).value)"
+                >
+                  <option value="LECTOR">Lector</option>
+                  <option value="EDITOR">Editor</option>
+                </select>
+                <button
+                  type="button"
+                  class="boton-texto boton-peligro"
+                  [disabled]="procesandoUsuarioId() === colaborador.usuario.id"
+                  (click)="quitar(colaborador)"
+                >
+                  Quitar
+                </button>
+              </div>
+            } @else {
+              <span class="etiqueta" [class.editor]="colaborador.rol === 'EDITOR'">
+                {{ colaborador.rol }}
+              </span>
+            }
+          </li>
+        }
+      </ul>
+    }
+  }
+</div>
