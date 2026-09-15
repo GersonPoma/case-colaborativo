@@ -1,1 +1,36 @@
-<p>toolbar works!</p>
+<div class="toolbar">
+  <a class="volver" [routerLink]="['/proyectos', proyectoId()]">← Volver</a>
+
+  @if (puedeEditar()) {
+    <button
+      type="button"
+      class="boton-herramienta"
+      [disabled]="!puedeDeshacer()"
+      title="Ctrl+Z (deshace solo tus últimos cambios)"
+      (click)="deshacer.emit()"
+    >
+      ↶ Deshacer
+    </button>
+  } @else {
+    <span class="solo-lectura">Solo lectura</span>
+  }
+
+  <button type="button" class="boton-herramienta" (click)="centrar.emit()">Centrar</button>
+
+  <span class="separador"></span>
+
+  <span class="estado-conexion" [class.conectado]="conectado()">
+    {{ conectado() ? '● En vivo' : '○ Conectando…' }}
+  </span>
+
+  @if (puedeEditar()) {
+    <button
+      type="button"
+      class="boton-primario-sm"
+      [disabled]="guardandoVersion()"
+      (click)="guardarVersion.emit()"
+    >
+      {{ guardandoVersion() ? 'Guardando...' : 'Guardar versión' }}
+    </button>
+  }
+</div>
