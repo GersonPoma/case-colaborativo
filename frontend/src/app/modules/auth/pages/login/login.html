@@ -8,6 +8,15 @@
 
     <label for="username">Usuario</label>
     <input id="username" type="text" formControlName="username" autocomplete="username" />
+    @if (formulario.controls.username.invalid && formulario.controls.username.touched) {
+      <p class="field-error">
+        @if (formulario.controls.username.errors?.['required']) {
+          Este campo es obligatorio
+        } @else if (formulario.controls.username.errors?.['minlength']) {
+          Debe tener al menos 3 caracteres
+        }
+      </p>
+    }
 
     <label for="password">Contraseña</label>
     <div class="password-field">
@@ -30,6 +39,15 @@
         }
       </button>
     </div>
+    @if (formulario.controls.password.invalid && formulario.controls.password.touched) {
+      <p class="field-error">
+        @if (formulario.controls.password.errors?.['required']) {
+          Este campo es obligatorio
+        } @else if (formulario.controls.password.errors?.['minlength']) {
+          Debe tener al menos 8 caracteres
+        }
+      </p>
+    }
 
     <button type="submit" [disabled]="cargando()">
       {{ cargando() ? 'Ingresando...' : 'Ingresar' }}
