@@ -1,0 +1,54 @@
+<div class="toolbox">
+  @if (puedeEditar()) {
+    <section class="grupo">
+      <h4>Clase</h4>
+      <button
+        type="button"
+        class="herramienta"
+        [class.activo]="modo() === 'crear-clase'"
+        (click)="alternar('crear-clase')"
+      >
+        + Clase
+      </button>
+    </section>
+
+    <section class="grupo">
+      <h4>Relaciones</h4>
+      @for (rel of relaciones; track rel.tipo) {
+        <button
+          type="button"
+          class="herramienta"
+          [class.activo]="modo() === rel.tipo"
+          (click)="alternar(rel.tipo)"
+        >
+          {{ rel.etiqueta }}
+        </button>
+      }
+      <button
+        type="button"
+        class="herramienta"
+        [class.activo]="modo() === 'clase-asociada'"
+        (click)="alternar('clase-asociada')"
+      >
+        Clase asociada
+      </button>
+    </section>
+
+    <section class="grupo">
+      <h4>Organizar</h4>
+      <button type="button" class="herramienta" (click)="alinear.emit()">Alinear</button>
+    </section>
+
+    @if (modo() !== 'seleccionar') {
+      <p class="ayuda">
+        @if (modo() === 'crear-clase') {
+          Hacé clic en el lienzo para ubicar la clase.
+        } @else {
+          Elegí la clase de origen y después la de destino.
+        }
+      </p>
+    }
+  } @else {
+    <p class="solo-lectura">Solo lectura</p>
+  }
+</div>

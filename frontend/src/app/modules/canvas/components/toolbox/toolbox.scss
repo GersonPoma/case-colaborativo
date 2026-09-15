@@ -1,0 +1,65 @@
+:host {
+  display: block;
+  width: 180px;
+  flex-shrink: 0;
+  height: 100%;
+  overflow-y: auto;
+  border-right: 1px solid #e0e0e0;
+  background: #fafafa;
+  box-sizing: border-box;
+}
+
+.toolbox {
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem;
+  gap: 1rem;
+}
+
+.grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+
+  h4 {
+    margin: 0 0 0.15rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #888;
+  }
+}
+
+.herramienta {
+  text-align: left;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+
+  &:hover {
+    background: #f0f0f0;
+  }
+
+  &.activo {
+    background: #1976d2;
+    color: #fff;
+    border-color: #1976d2;
+  }
+}
+
+.ayuda {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #1976d2;
+  background: #e3f2fd;
+  border-radius: 4px;
+  padding: 0.5rem;
+}
+
+.solo-lectura {
+  font-size: 0.8rem;
+  color: #999;
+  font-style: italic;
+}
