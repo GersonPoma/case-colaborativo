@@ -3,7 +3,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { obtenerMensajeError } from '../../../../core/utils/http-error.util';
-import { Colaborador, Proyecto } from '../../models/proyecto.model';
+import { Colaborador, HistorialVersionResumen, Proyecto } from '../../models/proyecto.model';
 import { WorkspaceApiService } from '../../services/workspace-api.service';
 
 @Component({
@@ -22,9 +22,11 @@ export class ProjectDetail {
 
   readonly proyecto = signal<Proyecto | null>(null);
   readonly colaboradores = signal<Colaborador[]>([]);
+  readonly historial = signal<HistorialVersionResumen[]>([]);
   readonly cargando = signal(true);
   readonly error = signal<string | null>(null);
   readonly eliminando = signal(false);
+  readonly restaurandoId = signal<number | null>(null);
 
   readonly esDueno = computed(() => {
     const usuario = this.authService.usuario();
@@ -44,6 +46,9 @@ export class ProjectDetail {
       next: (proyecto) => {
         this.proyecto.set(proyecto);
         this.cargarColaboradores();
+        if (this.esDueno()) {
+          this.cargarHistorial();
+        }
       },
       error: (err: unknown) => {
         this.cargando.set(false);
@@ -60,6 +65,33 @@ export class ProjectDetail {
       },
       error: (err: unknown) => {
         this.cargando.set(false);
+        this.error.set(obtenerMensajeError(err));
+      },
+    });
+  }
+
+  private cargarHistorial(): void {
+    this.workspaceApi.listarHistorial(this.proyectoId).subscribe({
+      next: (pagina) => this.historial.set(pagina.items),
+      error: (err: unknown) => this.error.set(obtenerMensajeError(err)),
+    });
+  }
+
+  restaurar(historialId: number): void {
+    if (!confirm('¿Restaurar el proyecto a esta versión? Se reemplaza el diagrama actual.')) {
+      return;
+    }
+
+    this.restaurandoId.set(historialId);
+    this.error.set(null);
+
+    this.workspaceApi.restaurarVersion(this.proyectoId, historialId).subscribe({
+      next: (proyecto) => {
+        this.proyecto.set(proyecto);
+        this.restaurandoId.set(null);
+      },
+      error: (err: unknown) => {
+        this.restaurandoId.set(null);
         this.error.set(obtenerMensajeError(err));
       },
     });

@@ -49,6 +49,31 @@
     </section>
 
     @if (esDueno()) {
+      <section>
+        <h2>Historial de versiones</h2>
+        @if (historial().length === 0) {
+          <p class="vacio">Todavía no hay versiones guardadas.</p>
+        } @else {
+          <ul class="lista-historial">
+            @for (version of historial(); track version.id) {
+              <li>
+                <span>{{ version.fecha | date: 'dd/MM/yyyy HH:mm' }}</span>
+                <button
+                  type="button"
+                  class="boton-texto"
+                  [disabled]="restaurandoId() === version.id"
+                  (click)="restaurar(version.id)"
+                >
+                  {{ restaurandoId() === version.id ? 'Restaurando...' : 'Restaurar' }}
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    }
+
+    @if (esDueno()) {
       <section class="zona-peligro">
         <h2>Zona peligrosa</h2>
         <button
