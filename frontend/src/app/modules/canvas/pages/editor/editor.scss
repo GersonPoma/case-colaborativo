@@ -1,0 +1,29 @@
+:host {
+  display: block;
+  height: 100vh;
+}
+
+.estado,
+.error {
+  padding: 1rem;
+}
+
+.editor-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.error.flotante {
+  margin: 0;
+  padding: 0.5rem 1rem;
+  background: #fdecea;
+  color: #c62828;
+  font-size: 0.85rem;
+}
+
+.editor-body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}

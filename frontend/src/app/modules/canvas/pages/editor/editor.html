@@ -1,1 +1,56 @@
-<p>editor works!</p>
+@if (cargando()) {
+  <p class="estado">Cargando editor...</p>
+} @else if (error() && !proyecto()) {
+  <p class="error">{{ error() }}</p>
+} @else if (proyecto(); as p) {
+  <div class="editor-layout">
+    <app-toolbar
+      [conectado]="canvasService.conectado()"
+      [puedeEditar]="puedeEditar()"
+      [proyectoId]="proyectoId"
+      [guardandoVersion]="guardandoVersion()"
+      [puedeDeshacer]="canvasService.puedeDeshacer()"
+      (centrar)="centrar()"
+      (guardarVersion)="guardarVersion()"
+      (deshacer)="canvasService.deshacer()"
+    />
+
+    @if (error()) {
+      <p class="error flotante">{{ error() }}</p>
+    }
+
+    <div class="editor-body">
+      <app-toolbox
+        [modo]="modo()"
+        [puedeEditar]="puedeEditar()"
+        (cambiarModo)="cambiarModo($event)"
+        (alinear)="alinear()"
+      />
+
+      <app-canvas-board
+        [lienzo]="canvasService.lienzo()"
+        [soloLectura]="!puedeEditar()"
+        [modo]="modo()"
+        (claseSeleccionada)="alClaseSeleccionada($event)"
+        (relacionSeleccionada)="alRelacionSeleccionada($event)"
+        (claseMovida)="alClaseMovida($event)"
+        (relacionPropuesta)="alRelacionPropuesta($event)"
+        (crearClaseSolicitada)="alCrearClaseEnPosicion($event)"
+      />
+
+      @if (claseSeleccionada(); as clase) {
+        <app-class-panel [clase]="clase" [soloLectura]="!puedeEditar()" (cerrar)="alClaseSeleccionada(null)" />
+      }
+    </div>
+  </div>
+
+  <app-relation-form
+    [abierto]="mostrarRelationForm()"
+    [origenId]="origenPendiente()"
+    [destinoId]="destinoPendiente()"
+    [relacion]="relacionEditando()"
+    [clases]="canvasService.lienzo()?.clases ?? {}"
+    [tipoInicial]="tipoRelacionPropuesta()"
+    (cerrado)="cerrarRelationForm()"
+  />
+}
