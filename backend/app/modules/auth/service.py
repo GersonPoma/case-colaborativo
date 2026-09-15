@@ -82,7 +82,7 @@ class UsuarioService:
         token = create_password_reset_token(
             subject=str(perfil.id_usuario), password_hash=usuario.password
         )
-        enlace = f"{settings.FRONTEND_URL}/auth/recover-password?token={token}"
+        enlace = f"{settings.FRONTEND_URL}/recuperar-contrasena?token={token}"
 
         await send_email(
             to=email,
