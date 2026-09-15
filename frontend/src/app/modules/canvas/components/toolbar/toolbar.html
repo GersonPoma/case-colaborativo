@@ -24,11 +24,14 @@
   </span>
 
   @if (puedeEditar()) {
+    <span class="autoguardado" title="Cada cambio se guarda solo, al instante">Autoguardado</span>
+
     <button
       type="button"
       class="boton-primario-sm"
       [disabled]="guardandoVersion()"
       (click)="guardarVersion.emit()"
+      title="Crea un punto del historial para volver a él más adelante"
     >
       {{ guardandoVersion() ? 'Guardando...' : 'Guardar versión' }}
     </button>
