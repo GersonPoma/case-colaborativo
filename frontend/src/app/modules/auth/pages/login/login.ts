@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { LucideEye, LucideEyeOff } from '@lucide/angular';
 import { AuthService } from '../../../../core/services/auth.service';
+import { obtenerMensajeError } from '../../../../core/utils/http-error.util';
 import { AuthApiService } from '../../services/auth-api.service';
 
 @Component({
@@ -48,17 +49,12 @@ export class Login {
       },
       error: (err: unknown) => {
         this.cargando.set(false);
-        this.error.set(this.obtenerMensajeError(err));
+        this.error.set(obtenerMensajeError(err));
       },
     });
   }
 
   alternarMostrarPassword(): void {
     this.mostrarPassword.update((valor) => !valor);
-  }
-
-  private obtenerMensajeError(err: unknown): string {
-    const detalle = (err as { error?: { detail?: unknown } })?.error?.detail;
-    return typeof detalle === 'string' ? detalle : 'Ocurrió un error. Intenta de nuevo.';
   }
 }
