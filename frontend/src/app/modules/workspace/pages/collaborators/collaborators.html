@@ -78,6 +78,11 @@
           </li>
         }
       </ul>
+      <app-paginador
+        [pagina]="pagina()"
+        [totalPaginas]="totalPaginas()"
+        (cambio)="cambiarPagina($event)"
+      />
     }
   }
 </div>

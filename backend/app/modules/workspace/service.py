@@ -172,6 +172,18 @@ class HistorialVersionesService:
         await self.db.commit()
         return historial
 
+    async def obtener_lienzo(
+        self, proyecto_id: int, id_dueno_solicitante: int, historial_id: int
+    ) -> dict:
+        proyecto = await self.proyecto_service.obtener(proyecto_id)
+        await self.proyecto_service.verificar_dueno(proyecto, id_dueno_solicitante)
+
+        historial = await self.historial_repository.get_by_id(historial_id)
+        if historial is None or historial.id_proyecto != proyecto_id:
+            raise NotFoundError("Versión no encontrada")
+
+        return historial.snapshot_lienzo
+
     async def restaurar(
         self, proyecto_id: int, id_dueno_solicitante: int, historial_id: int
     ) -> Proyecto:

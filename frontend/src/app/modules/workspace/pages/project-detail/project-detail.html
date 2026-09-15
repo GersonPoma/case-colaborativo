@@ -58,17 +58,27 @@
             @for (version of historial(); track version.id) {
               <li>
                 <span>{{ version.fecha | date: 'dd/MM/yyyy HH:mm' }}</span>
-                <button
-                  type="button"
-                  class="boton-texto"
-                  [disabled]="restaurandoId() === version.id"
-                  (click)="restaurar(version.id)"
-                >
-                  {{ restaurandoId() === version.id ? 'Restaurando...' : 'Restaurar' }}
-                </button>
+                <div class="acciones-version">
+                  <button type="button" class="boton-texto" (click)="verPreview(version.id)">
+                    Vista previa
+                  </button>
+                  <button
+                    type="button"
+                    class="boton-texto"
+                    [disabled]="restaurandoId() === version.id"
+                    (click)="restaurar(version.id)"
+                  >
+                    {{ restaurandoId() === version.id ? 'Restaurando...' : 'Restaurar' }}
+                  </button>
+                </div>
               </li>
             }
           </ul>
+          <app-paginador
+            [pagina]="paginaHistorial()"
+            [totalPaginas]="totalPaginasHistorial()"
+            (cambio)="cambiarPaginaHistorial($event)"
+          />
         }
       </section>
     }
@@ -88,3 +98,12 @@
     }
   }
 </div>
+
+<app-modal [abierto]="mostrarPreview()" ancho="640px" (cerrado)="cerrarPreview()">
+  <h2>Vista previa de la versión</h2>
+  @if (cargandoPreview()) {
+    <p class="estado">Cargando diagrama...</p>
+  } @else {
+    <app-diagram-preview [lienzo]="lienzoPreview()" />
+  }
+</app-modal>

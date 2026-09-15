@@ -8,6 +8,7 @@ import { Component, input, output } from '@angular/core';
 })
 export class Modal {
   readonly abierto = input(false);
+  readonly ancho = input('360px');
   readonly cerrado = output<void>();
 
   cerrar(): void {

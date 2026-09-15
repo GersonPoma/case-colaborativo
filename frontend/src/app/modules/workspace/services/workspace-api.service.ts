@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { EstadoLienzo } from '../../../core/models/lienzo.model';
 import { Pagina } from '../../../core/models/pagina.model';
 import {
   CambiarRolColaborador,
@@ -30,13 +31,13 @@ export class WorkspaceApiService {
     return this.http.post<Proyecto>(this.baseUrl, datos);
   }
 
-  listarPropios(pagina = 1, tamano = 20): Observable<Pagina<Proyecto>> {
+  listarPropios(pagina = 1, tamano = 10): Observable<Pagina<Proyecto>> {
     return this.http.get<Pagina<Proyecto>>(`${this.baseUrl}/propios`, {
       params: this.paginar(pagina, tamano),
     });
   }
 
-  listarColaboraciones(pagina = 1, tamano = 20): Observable<Pagina<ProyectoConRol>> {
+  listarColaboraciones(pagina = 1, tamano = 10): Observable<Pagina<ProyectoConRol>> {
     return this.http.get<Pagina<ProyectoConRol>>(`${this.baseUrl}/colaboraciones`, {
       params: this.paginar(pagina, tamano),
     });
@@ -50,7 +51,7 @@ export class WorkspaceApiService {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 
-  listarColaboradores(id: number, pagina = 1, tamano = 20): Observable<Pagina<Colaborador>> {
+  listarColaboradores(id: number, pagina = 1, tamano = 10): Observable<Pagina<Colaborador>> {
     return this.http.get<Pagina<Colaborador>>(`${this.baseUrl}/${id}/colaboradores`, {
       params: this.paginar(pagina, tamano),
     });
@@ -78,11 +79,15 @@ export class WorkspaceApiService {
   listarHistorial(
     id: number,
     pagina = 1,
-    tamano = 20,
+    tamano = 10,
   ): Observable<Pagina<HistorialVersionResumen>> {
     return this.http.get<Pagina<HistorialVersionResumen>>(`${this.baseUrl}/${id}/historial`, {
       params: this.paginar(pagina, tamano),
     });
+  }
+
+  obtenerLienzoHistorial(id: number, historialId: number): Observable<EstadoLienzo> {
+    return this.http.get<EstadoLienzo>(`${this.baseUrl}/${id}/historial/${historialId}/lienzo`);
   }
 
   restaurarVersion(id: number, historialId: number): Observable<Proyecto> {

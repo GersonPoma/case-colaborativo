@@ -1,6 +1,6 @@
 @if (abierto()) {
   <div class="modal-backdrop" (click)="cerrar()">
-    <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-card" [style.max-width]="ancho()" (click)="$event.stopPropagation()">
       <button type="button" class="modal-close" aria-label="Cerrar" (click)="cerrar()">×</button>
       <ng-content></ng-content>
     </div>

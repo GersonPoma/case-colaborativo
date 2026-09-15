@@ -30,6 +30,11 @@
             </a>
           }
         </div>
+        <app-paginador
+          [pagina]="paginaPropios()"
+          [totalPaginas]="totalPaginasPropios()"
+          (cambio)="cambiarPaginaPropios($event)"
+        />
       }
     </section>
 
@@ -47,6 +52,11 @@
             </a>
           }
         </div>
+        <app-paginador
+          [pagina]="paginaColaboraciones()"
+          [totalPaginas]="totalPaginasColaboraciones()"
+          (cambio)="cambiarPaginaColaboraciones($event)"
+        />
       }
     </section>
   }

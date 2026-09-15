@@ -4,12 +4,13 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
 import { obtenerMensajeError } from '../../../../core/utils/http-error.util';
+import { Paginador } from '../../../../shared/components/paginador/paginador';
 import { Colaborador, Proyecto, RolColaborador } from '../../models/proyecto.model';
 import { WorkspaceApiService } from '../../services/workspace-api.service';
 
 @Component({
   selector: 'app-collaborators',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, Paginador],
   templateUrl: './collaborators.html',
   styleUrl: './collaborators.scss',
 })
@@ -23,6 +24,8 @@ export class Collaborators {
 
   readonly proyecto = signal<Proyecto | null>(null);
   readonly colaboradores = signal<Colaborador[]>([]);
+  readonly pagina = signal(1);
+  readonly totalPaginas = signal(1);
   readonly cargando = signal(true);
   readonly error = signal<string | null>(null);
   readonly invitando = signal(false);
@@ -49,17 +52,29 @@ export class Collaborators {
 
     forkJoin({
       proyecto: this.workspaceApi.obtener(this.proyectoId),
-      colaboradores: this.workspaceApi.listarColaboradores(this.proyectoId),
+      colaboradores: this.workspaceApi.listarColaboradores(this.proyectoId, this.pagina()),
     }).subscribe({
       next: ({ proyecto, colaboradores }) => {
         this.proyecto.set(proyecto);
         this.colaboradores.set(colaboradores.items);
+        this.totalPaginas.set(colaboradores.total_paginas);
         this.cargando.set(false);
       },
       error: (err: unknown) => {
         this.cargando.set(false);
         this.error.set(obtenerMensajeError(err));
       },
+    });
+  }
+
+  cambiarPagina(pagina: number): void {
+    this.pagina.set(pagina);
+    this.workspaceApi.listarColaboradores(this.proyectoId, pagina).subscribe({
+      next: (respuesta) => {
+        this.colaboradores.set(respuesta.items);
+        this.totalPaginas.set(respuesta.total_paginas);
+      },
+      error: (err: unknown) => this.error.set(obtenerMensajeError(err)),
     });
   }
 

@@ -1,0 +1,9 @@
+@if (totalPaginas() > 1) {
+  <div class="paginador">
+    <button type="button" [disabled]="pagina() <= 1" (click)="anterior()">← Anterior</button>
+    <span>Página {{ pagina() }} de {{ totalPaginas() }}</span>
+    <button type="button" [disabled]="pagina() >= totalPaginas()" (click)="siguiente()">
+      Siguiente →
+    </button>
+  </div>
+}
