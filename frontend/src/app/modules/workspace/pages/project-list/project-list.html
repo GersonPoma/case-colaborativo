@@ -1,1 +1,81 @@
-<p>project-list works!</p>
+<div class="page">
+  <header class="page-header">
+    <h1>Mis proyectos</h1>
+    <div class="acciones-header">
+      <button type="button" class="boton-primario" (click)="abrirFormulario()">
+        + Nuevo proyecto
+      </button>
+      <button type="button" class="boton-texto" (click)="cerrarSesion()">Cerrar sesión</button>
+    </div>
+  </header>
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  @if (cargando()) {
+    <p class="estado">Cargando proyectos...</p>
+  } @else {
+    <section>
+      <h2>Propios</h2>
+      @if (propios().length === 0) {
+        <p class="vacio">Todavía no creaste ningún proyecto.</p>
+      } @else {
+        <div class="grid">
+          @for (proyecto of propios(); track proyecto.id) {
+            <a class="tarjeta" [routerLink]="['/editor', proyecto.id]">
+              <h3>{{ proyecto.nombre }}</h3>
+              <p>{{ proyecto.descripcion || 'Sin descripción' }}</p>
+              <span class="fecha">{{ proyecto.created_at | date: 'dd/MM/yyyy' }}</span>
+            </a>
+          }
+        </div>
+      }
+    </section>
+
+    <section>
+      <h2>Compartidos conmigo</h2>
+      @if (colaboraciones().length === 0) {
+        <p class="vacio">No sos colaborador de ningún proyecto todavía.</p>
+      } @else {
+        <div class="grid">
+          @for (item of colaboraciones(); track item.proyecto.id) {
+            <a class="tarjeta" [routerLink]="['/editor', item.proyecto.id]">
+              <h3>{{ item.proyecto.nombre }}</h3>
+              <p>{{ item.proyecto.descripcion || 'Sin descripción' }}</p>
+              <span class="etiqueta" [class.editor]="item.rol === 'EDITOR'">{{ item.rol }}</span>
+            </a>
+          }
+        </div>
+      }
+    </section>
+  }
+</div>
+
+<app-modal [abierto]="mostrarFormulario()" (cerrado)="cancelarFormulario()">
+  <h2>Nuevo proyecto</h2>
+
+  <form [formGroup]="formulario" (ngSubmit)="crear()">
+    <div class="campo">
+      <label for="nombre">Nombre</label>
+      <input id="nombre" type="text" formControlName="nombre" autocomplete="off" />
+      @if (formulario.controls.nombre.invalid && formulario.controls.nombre.touched) {
+        <p class="field-error">Este campo es obligatorio</p>
+      }
+    </div>
+
+    <div class="campo">
+      <label for="descripcion">Descripción (opcional)</label>
+      <textarea id="descripcion" formControlName="descripcion" rows="3"></textarea>
+    </div>
+
+    <div class="acciones-form">
+      <button type="button" class="boton-secundario" (click)="cancelarFormulario()">
+        Cancelar
+      </button>
+      <button type="submit" class="boton-primario" [disabled]="creando()">
+        {{ creando() ? 'Creando...' : 'Crear proyecto' }}
+      </button>
+    </div>
+  </form>
+</app-modal>
