@@ -25,6 +25,12 @@ h1 {
   text-align: center;
 }
 
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
 label {
   font-size: 0.85rem;
   font-weight: 600;
@@ -104,7 +110,7 @@ button {
 .field-error {
   color: #b3261e;
   font-size: 0.75rem;
-  margin: -0.4rem 0 0;
+  margin: 0;
 }
 
 .links {
