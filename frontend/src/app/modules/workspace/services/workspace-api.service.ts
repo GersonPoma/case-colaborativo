@@ -90,6 +90,10 @@ export class WorkspaceApiService {
     return this.http.get<EstadoLienzo>(`${this.baseUrl}/${id}/historial/${historialId}/lienzo`);
   }
 
+  crearVersionHistorial(id: number): Observable<HistorialVersionResumen> {
+    return this.http.post<HistorialVersionResumen>(`${this.baseUrl}/${id}/historial`, {});
+  }
+
   restaurarVersion(id: number, historialId: number): Observable<Proyecto> {
     return this.http.post<Proyecto>(
       `${this.baseUrl}/${id}/historial/${historialId}/restaurar`,
