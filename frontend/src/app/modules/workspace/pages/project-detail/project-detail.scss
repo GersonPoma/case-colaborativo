@@ -1,0 +1,160 @@
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.volver {
+  display: inline-block;
+  font-size: 0.85rem;
+  color: #4a6cf7;
+  text-decoration: none;
+  margin-bottom: 1rem;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+
+  h1 {
+    margin: 0 0 0.35rem;
+    font-size: 1.4rem;
+  }
+}
+
+.descripcion {
+  margin: 0 0 0.35rem;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.fecha {
+  font-size: 0.75rem;
+  color: #999;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+h2 {
+  font-size: 1.05rem;
+  margin: 1.5rem 0 0.75rem;
+  color: #333;
+}
+
+.estado,
+.vacio {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.lista-colaboradores {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    border: 1px solid #e2e4ea;
+    border-radius: 6px;
+    padding: 0.6rem 0.85rem;
+    font-size: 0.9rem;
+  }
+}
+
+.etiqueta {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: #eef0f5;
+  color: #555;
+
+  &.editor {
+    background: #e3f2fd;
+    color: #1565c0;
+  }
+}
+
+.zona-peligro {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+.boton-primario,
+.boton-texto,
+.boton-peligro {
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.boton-primario {
+  background: #4a6cf7;
+  color: #fff;
+  border: none;
+  padding: 0.55rem 1rem;
+  display: inline-block;
+
+  &:hover {
+    background: #3a5ce0;
+  }
+}
+
+.boton-texto {
+  background: none;
+  border: none;
+  color: #4a6cf7;
+  padding: 0.4rem;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.boton-peligro {
+  background: #fff;
+  color: #b3261e;
+  border: 1px solid #b3261e;
+  padding: 0.55rem 1rem;
+
+  &:hover:not(:disabled) {
+    background: #fdecea;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.error {
+  background: #fdecea;
+  color: #b3261e;
+  padding: 0.6rem 0.85rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  margin: 0 0 1rem;
+}

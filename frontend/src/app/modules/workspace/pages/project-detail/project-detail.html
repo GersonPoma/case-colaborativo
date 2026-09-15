@@ -1,1 +1,65 @@
-<p>project-detail works!</p>
+<div class="page">
+  <a class="volver" routerLink="/proyectos">← Volver a mis proyectos</a>
+
+  @if (cargando()) {
+    <p class="estado">Cargando proyecto...</p>
+  } @else if (error() && !proyecto()) {
+    <p class="error">{{ error() }}</p>
+  } @else if (proyecto(); as p) {
+    <header class="page-header">
+      <div>
+        <h1>{{ p.nombre }}</h1>
+        <p class="descripcion">{{ p.descripcion || 'Sin descripción' }}</p>
+        <span class="fecha">Creado el {{ p.created_at | date: 'dd/MM/yyyy' }}</span>
+      </div>
+
+      <div class="acciones-header">
+        <a class="boton-primario" [routerLink]="['/editor', p.id]">Abrir en el editor</a>
+      </div>
+    </header>
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+
+    <section>
+      <div class="section-header">
+        <h2>Colaboradores</h2>
+        @if (esDueno()) {
+          <a class="boton-texto" [routerLink]="['/proyectos', p.id, 'colaboradores']">
+            Gestionar colaboradores
+          </a>
+        }
+      </div>
+
+      @if (colaboradores().length === 0) {
+        <p class="vacio">Todavía no invitaste a nadie.</p>
+      } @else {
+        <ul class="lista-colaboradores">
+          @for (colaborador of colaboradores(); track colaborador.usuario.id) {
+            <li>
+              <span>{{ colaborador.usuario.username }}</span>
+              <span class="etiqueta" [class.editor]="colaborador.rol === 'EDITOR'">
+                {{ colaborador.rol }}
+              </span>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    @if (esDueno()) {
+      <section class="zona-peligro">
+        <h2>Zona peligrosa</h2>
+        <button
+          type="button"
+          class="boton-peligro"
+          [disabled]="eliminando()"
+          (click)="eliminar()"
+        >
+          {{ eliminando() ? 'Eliminando...' : 'Eliminar proyecto' }}
+        </button>
+      </section>
+    }
+  }
+</div>
