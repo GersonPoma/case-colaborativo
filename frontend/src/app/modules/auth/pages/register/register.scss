@@ -1,0 +1,140 @@
+.register-page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f6fa;
+  padding: 1rem;
+}
+
+.register-card {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+h1 {
+  font-size: 1.4rem;
+  margin: 0 0 0.5rem;
+  text-align: center;
+}
+
+label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #444;
+}
+
+input {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  box-sizing: border-box;
+
+  &:focus {
+    outline: none;
+    border-color: #4a6cf7;
+  }
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.campo-doble {
+  display: flex;
+  gap: 0.75rem;
+
+  > .campo {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.password-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  input {
+    padding-right: 2.75rem;
+  }
+
+  .toggle-password {
+    position: absolute;
+    right: 0.5rem;
+    display: flex;
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    padding: 0.25rem;
+    margin: 0;
+    border-radius: 4px;
+
+    &:hover {
+      color: #4a6cf7;
+    }
+  }
+}
+
+button {
+  margin-top: 0.5rem;
+  padding: 0.7rem;
+  border: none;
+  border-radius: 6px;
+  background: #4a6cf7;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &:hover:not(:disabled) {
+    background: #3a5ce0;
+  }
+}
+
+.error {
+  background: #fdecea;
+  color: #b3261e;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.field-error {
+  color: #b3261e;
+  font-size: 0.75rem;
+  margin: 0;
+}
+
+.links {
+  display: flex;
+  justify-content: center;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+
+  a {
+    color: #4a6cf7;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
