@@ -23,7 +23,7 @@
       } @else {
         <div class="grid">
           @for (proyecto of propios(); track proyecto.id) {
-            <a class="tarjeta" [routerLink]="['/editor', proyecto.id]">
+            <a class="tarjeta" [routerLink]="['/proyectos', proyecto.id]">
               <h3>{{ proyecto.nombre }}</h3>
               <p>{{ proyecto.descripcion || 'Sin descripción' }}</p>
               <span class="fecha">{{ proyecto.created_at | date: 'dd/MM/yyyy' }}</span>
@@ -40,7 +40,7 @@
       } @else {
         <div class="grid">
           @for (item of colaboraciones(); track item.proyecto.id) {
-            <a class="tarjeta" [routerLink]="['/editor', item.proyecto.id]">
+            <a class="tarjeta" [routerLink]="['/proyectos', item.proyecto.id]">
               <h3>{{ item.proyecto.nombre }}</h3>
               <p>{{ item.proyecto.descripcion || 'Sin descripción' }}</p>
               <span class="etiqueta" [class.editor]="item.rol === 'EDITOR'">{{ item.rol }}</span>
