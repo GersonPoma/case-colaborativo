@@ -1,0 +1,68 @@
+<app-modal [abierto]="abierto()" ancho="420px" (cerrado)="cancelar()">
+  @if (confirmandoEliminar()) {
+    <h2>Eliminar relación</h2>
+    <p>
+      ¿Eliminar la relación entre "<strong>{{ nombreOrigen() }}</strong>" y "<strong>{{ nombreDestino() }}</strong>"?
+      Esta acción no se puede deshacer.
+    </p>
+    <div class="acciones-form">
+      <button type="button" class="boton-secundario" (click)="cancelarEliminar()">Cancelar</button>
+      <button type="button" class="boton-peligro" (click)="confirmarEliminar()">Eliminar</button>
+    </div>
+  } @else {
+  <h2>{{ editando() ? 'Editar relación' : 'Nueva relación' }}</h2>
+  <p class="resumen">{{ nombreOrigen() }} → {{ nombreDestino() }}</p>
+
+  <form [formGroup]="formulario" (ngSubmit)="guardar()">
+    <div class="campo">
+      <label for="tipo">Tipo</label>
+      <select id="tipo" formControlName="tipo">
+        <option value="ASOCIACION">Asociación</option>
+        <option value="AGREGACION">Agregación</option>
+        <option value="COMPOSICION">Composición</option>
+        <option value="HERENCIA">Herencia (generalización)</option>
+        <option value="REALIZACION">Realización (implementa)</option>
+        <option value="TEMPLATE_BINDING">Template binding</option>
+      </select>
+    </div>
+
+    <div class="fila">
+      <div class="campo">
+        <label for="cardinalidad_origen">Cardinalidad origen</label>
+        <input id="cardinalidad_origen" type="text" formControlName="cardinalidad_origen" placeholder="1, 0..1, *" />
+      </div>
+      <div class="campo">
+        <label for="cardinalidad_destino">Cardinalidad destino</label>
+        <input id="cardinalidad_destino" type="text" formControlName="cardinalidad_destino" placeholder="1, 0..1, *" />
+      </div>
+    </div>
+
+    <div class="campo">
+      <label for="etiqueta">Etiqueta (opcional)</label>
+      <input id="etiqueta" type="text" formControlName="etiqueta" placeholder="pertenece, realiza..." />
+    </div>
+
+    <div class="campo">
+      <label for="clase_asociada">Clase asociada (opcional, N a N)</label>
+      @if (claseAsociadaIdActual()) {
+        <div class="clase-asociada-actual">
+          <span>{{ nombreClaseAsociadaActual() }}</span>
+          <button type="button" class="boton-texto" (click)="quitarClaseAsociada()">Quitar</button>
+        </div>
+      } @else {
+        <button type="button" class="boton-secundario" (click)="crearClaseAsociada()">
+          + Crear clase asociada
+        </button>
+      }
+    </div>
+
+    <div class="acciones-form">
+      @if (editando()) {
+        <button type="button" class="boton-peligro" (click)="eliminar()">Eliminar</button>
+      }
+      <button type="button" class="boton-secundario" (click)="cancelar()">Cancelar</button>
+      <button type="submit" class="boton-primario">Guardar</button>
+    </div>
+  </form>
+  }
+</app-modal>
