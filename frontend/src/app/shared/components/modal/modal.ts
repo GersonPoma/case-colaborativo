@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 
 @Component({
   selector: 'app-modal',
@@ -6,4 +6,11 @@ import { Component } from '@angular/core';
   templateUrl: './modal.html',
   styleUrl: './modal.scss',
 })
-export class Modal {}
+export class Modal {
+  readonly abierto = input(false);
+  readonly cerrado = output<void>();
+
+  cerrar(): void {
+    this.cerrado.emit();
+  }
+}
