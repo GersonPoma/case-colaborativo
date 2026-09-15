@@ -22,6 +22,20 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'proyectos/:id',
+    loadComponent: () =>
+      import('./modules/workspace/pages/project-detail/project-detail').then(
+        (m) => m.ProjectDetail,
+      ),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'proyectos/:id/colaboradores',
+    loadComponent: () =>
+      import('./modules/workspace/pages/collaborators/collaborators').then((m) => m.Collaborators),
+    canActivate: [authGuard],
+  },
+  {
     path: 'iniciar-sesion',
     loadComponent: () => import('./modules/auth/pages/login/login').then((m) => m.Login),
   },
