@@ -114,7 +114,9 @@ class CanvasService:
         estado["relaciones"] = {
             rid: r
             for rid, r in estado["relaciones"].items()
-            if r["origen_id"] != datos.clase_id and r["destino_id"] != datos.clase_id
+            if r["origen_id"] != datos.clase_id
+            and r["destino_id"] != datos.clase_id
+            and r.get("clase_asociada_id") != datos.clase_id
         }
 
         await self._guardar_estado(proyecto, estado)
@@ -288,15 +290,36 @@ class CanvasService:
     async def eliminar_relacion(self, proyecto_id: int, datos: EliminarRelacion) -> dict:
         proyecto, estado = await self._obtener_estado(proyecto_id)
 
-        if datos.relacion_id not in estado["relaciones"]:
+        relacion = estado["relaciones"].get(datos.relacion_id)
+        if relacion is None:
             raise NotFoundError("Relación no encontrada")
 
         relaciones = dict(estado["relaciones"])
         del relaciones[datos.relacion_id]
+
+        # una clase asociada vive y muere junto con su relación (como en Enterprise
+        # Architect): al borrar la relación se borra también esa clase, y con ella
+        # cualquier otra relación que dependiera de esa clase.
+        clase_asociada_id = relacion.get("clase_asociada_id")
+        if clase_asociada_id and clase_asociada_id in estado["clases"]:
+            clases = dict(estado["clases"])
+            del clases[clase_asociada_id]
+            estado["clases"] = clases
+
+            relaciones = {
+                rid: r
+                for rid, r in relaciones.items()
+                if r["origen_id"] != clase_asociada_id
+                and r["destino_id"] != clase_asociada_id
+                and r.get("clase_asociada_id") != clase_asociada_id
+            }
+        else:
+            clase_asociada_id = None
+
         estado["relaciones"] = relaciones
 
         await self._guardar_estado(proyecto, estado)
-        return {"relacion_id": datos.relacion_id}
+        return {"relacion_id": datos.relacion_id, "clase_asociada_id": clase_asociada_id}
 
     async def modificar_ui(self, proyecto_id: int, datos: ModificarUI) -> dict:
         proyecto, estado = await self._obtener_estado(proyecto_id)
