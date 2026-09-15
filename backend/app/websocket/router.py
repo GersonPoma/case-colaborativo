@@ -126,7 +126,7 @@ async def canvas_websocket(
                 continue
 
             salida = MensajeSaliente(accion=mensaje.accion, datos=resultado, usuario_id=usuario_id)
-            await manager.difundir(proyecto_id, salida.model_dump(mode="json"), excluir=websocket)
+            await manager.difundir(proyecto_id, salida.model_dump(mode="json"))
     except WebSocketDisconnect:
         pass
     finally:
