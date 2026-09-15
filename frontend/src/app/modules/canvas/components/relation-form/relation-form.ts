@@ -75,17 +75,6 @@ export class RelationForm {
     });
   }
 
-  quitarClaseAsociada(): void {
-    this.claseAsociadaIdActual.set(null);
-  }
-
-  crearClaseAsociada(): void {
-    const { x, y } = this.posicionClaseAsociada();
-    this.canvasService.crearClase('NuevaClase', x, y, (clase) => {
-      this.claseAsociadaIdActual.set(clase.id);
-    });
-  }
-
   guardar(): void {
     if (this.formulario.invalid) {
       this.formulario.markAllAsTouched();
@@ -107,20 +96,6 @@ export class RelationForm {
       this.canvasService.trazarRelacion(this.origenId()!, this.destinoId()!, datos);
     }
     this.cerrado.emit();
-  }
-
-  private posicionClaseAsociada(): { x: number; y: number } {
-    const origenId = this.relacion()?.origen_id ?? this.origenId();
-    const destinoId = this.relacion()?.destino_id ?? this.destinoId();
-    const origen = origenId ? this.clases()[origenId] : undefined;
-    const destino = destinoId ? this.clases()[destinoId] : undefined;
-    if (origen && destino) {
-      return {
-        x: Math.round((origen.ui.x + destino.ui.x) / 2),
-        y: Math.round((origen.ui.y + destino.ui.y) / 2) + 140,
-      };
-    }
-    return { x: 200, y: 400 };
   }
 
   eliminar(): void {

@@ -42,19 +42,14 @@
       <input id="etiqueta" type="text" formControlName="etiqueta" placeholder="pertenece, realiza..." />
     </div>
 
-    <div class="campo">
-      <label for="clase_asociada">Clase asociada (opcional, N a N)</label>
-      @if (claseAsociadaIdActual()) {
+    @if (claseAsociadaIdActual()) {
+      <div class="campo">
+        <label>Clase asociada</label>
         <div class="clase-asociada-actual">
           <span>{{ nombreClaseAsociadaActual() }}</span>
-          <button type="button" class="boton-texto" (click)="quitarClaseAsociada()">Quitar</button>
         </div>
-      } @else {
-        <button type="button" class="boton-secundario" (click)="crearClaseAsociada()">
-          + Crear clase asociada
-        </button>
-      }
-    </div>
+      </div>
+    }
 
     <div class="acciones-form">
       @if (editando()) {
