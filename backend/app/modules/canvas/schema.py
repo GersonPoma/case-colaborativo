@@ -14,6 +14,7 @@ class AccionCanvas(str, enum.Enum):
     EDITAR_METODO = "EDITAR_METODO"
     ELIMINAR_METODO = "ELIMINAR_METODO"
     TRAZAR_RELACION = "TRAZAR_RELACION"
+    EDITAR_RELACION = "EDITAR_RELACION"
     ELIMINAR_RELACION = "ELIMINAR_RELACION"
     MODIFICAR_UI = "MODIFICAR_UI"
     ALINEAR_NODOS = "ALINEAR_NODOS"
@@ -23,6 +24,16 @@ class Visibilidad(str, enum.Enum):
     PUBLICO = "PUBLICO"
     PRIVADO = "PRIVADO"
     PROTEGIDO = "PROTEGIDO"
+    PAQUETE = "PAQUETE"
+
+
+class TipoRelacion(str, enum.Enum):
+    ASOCIACION = "ASOCIACION"
+    AGREGACION = "AGREGACION"
+    COMPOSICION = "COMPOSICION"
+    HERENCIA = "HERENCIA"
+    REALIZACION = "REALIZACION"
+    TEMPLATE_BINDING = "TEMPLATE_BINDING"
 
 
 # estructura del estado_lienzo (para referencia / validación de salida)
@@ -38,7 +49,7 @@ class UIClase(BaseModel):
 class Atributo(BaseModel):
     id: str
     nombre: str
-    tipo: str
+    tipo: str | None = None
     es_pk: bool = False
     visibilidad: Visibilidad = Visibilidad.PRIVADO
     orden: int = 0
@@ -52,7 +63,7 @@ class ParametroMetodo(BaseModel):
 class Metodo(BaseModel):
     id: str
     nombre: str
-    tipo_retorno: str
+    tipo_retorno: str | None = None
     parametros: list[ParametroMetodo] = []
     visibilidad: Visibilidad = Visibilidad.PUBLICO
     orden: int = 0
@@ -74,9 +85,11 @@ class Relacion(BaseModel):
     id: str
     origen_id: str
     destino_id: str
-    tipo: str
-    cardinalidad_origen: str
-    cardinalidad_destino: str
+    tipo: TipoRelacion = TipoRelacion.ASOCIACION
+    cardinalidad_origen: str | None = None
+    cardinalidad_destino: str | None = None
+    etiqueta: str | None = None
+    clase_asociada_id: str | None = None
     ui: UIRelacion = UIRelacion()
 
 
@@ -112,7 +125,7 @@ class EliminarClase(BaseModel):
 class AgregarAtributo(BaseModel):
     clase_id: str
     nombre: str
-    tipo: str
+    tipo: str | None = None
     es_pk: bool = False
     visibilidad: Visibilidad = Visibilidad.PRIVADO
 
@@ -121,7 +134,7 @@ class EditarAtributo(BaseModel):
     clase_id: str
     atributo_id: str
     nombre: str
-    tipo: str
+    tipo: str | None = None
     es_pk: bool = False
     visibilidad: Visibilidad = Visibilidad.PRIVADO
 
@@ -134,7 +147,7 @@ class EliminarAtributo(BaseModel):
 class AgregarMetodo(BaseModel):
     clase_id: str
     nombre: str
-    tipo_retorno: str
+    tipo_retorno: str | None = None
     parametros: list[ParametroMetodo] = []
     visibilidad: Visibilidad = Visibilidad.PUBLICO
 
@@ -143,7 +156,7 @@ class EditarMetodo(BaseModel):
     clase_id: str
     metodo_id: str
     nombre: str
-    tipo_retorno: str
+    tipo_retorno: str | None = None
     parametros: list[ParametroMetodo] = []
     visibilidad: Visibilidad = Visibilidad.PUBLICO
 
@@ -156,9 +169,20 @@ class EliminarMetodo(BaseModel):
 class TrazarRelacion(BaseModel):
     origen_id: str
     destino_id: str
-    tipo: str
-    cardinalidad_origen: str
-    cardinalidad_destino: str
+    tipo: TipoRelacion = TipoRelacion.ASOCIACION
+    cardinalidad_origen: str | None = None
+    cardinalidad_destino: str | None = None
+    etiqueta: str | None = None
+    clase_asociada_id: str | None = None
+
+
+class EditarRelacion(BaseModel):
+    relacion_id: str
+    tipo: TipoRelacion = TipoRelacion.ASOCIACION
+    cardinalidad_origen: str | None = None
+    cardinalidad_destino: str | None = None
+    etiqueta: str | None = None
+    clase_asociada_id: str | None = None
 
 
 class EliminarRelacion(BaseModel):

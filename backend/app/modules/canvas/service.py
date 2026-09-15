@@ -11,6 +11,7 @@ from app.modules.canvas.schema import (
     EditarAtributo,
     EditarClase,
     EditarMetodo,
+    EditarRelacion,
     EliminarAtributo,
     EliminarClase,
     EliminarMetodo,
@@ -241,17 +242,45 @@ class CanvasService:
         if datos.origen_id not in estado["clases"] or datos.destino_id not in estado["clases"]:
             raise NotFoundError("La clase de origen o destino no existe")
 
+        if datos.clase_asociada_id is not None and datos.clase_asociada_id not in estado["clases"]:
+            raise NotFoundError("La clase asociada no existe")
+
         relacion_id = str(uuid.uuid4())
         relacion = {
             "id": relacion_id,
             "origen_id": datos.origen_id,
             "destino_id": datos.destino_id,
-            "tipo": datos.tipo,
+            "tipo": datos.tipo.value,
             "cardinalidad_origen": datos.cardinalidad_origen,
             "cardinalidad_destino": datos.cardinalidad_destino,
+            "etiqueta": datos.etiqueta,
+            "clase_asociada_id": datos.clase_asociada_id,
             "ui": {"vertices": []},
         }
         estado["relaciones"] = {**estado["relaciones"], relacion_id: relacion}
+
+        await self._guardar_estado(proyecto, estado)
+        return relacion
+
+    async def editar_relacion(self, proyecto_id: int, datos: EditarRelacion) -> dict:
+        proyecto, estado = await self._obtener_estado(proyecto_id)
+
+        if datos.relacion_id not in estado["relaciones"]:
+            raise NotFoundError("Relación no encontrada")
+
+        if datos.clase_asociada_id is not None and datos.clase_asociada_id not in estado["clases"]:
+            raise NotFoundError("La clase asociada no existe")
+
+        relacion_anterior = estado["relaciones"][datos.relacion_id]
+        relacion = {
+            **relacion_anterior,
+            "tipo": datos.tipo.value,
+            "cardinalidad_origen": datos.cardinalidad_origen,
+            "cardinalidad_destino": datos.cardinalidad_destino,
+            "etiqueta": datos.etiqueta,
+            "clase_asociada_id": datos.clase_asociada_id,
+        }
+        estado["relaciones"] = {**estado["relaciones"], datos.relacion_id: relacion}
 
         await self._guardar_estado(proyecto, estado)
         return relacion

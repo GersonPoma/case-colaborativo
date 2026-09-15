@@ -1,4 +1,11 @@
-export type Visibilidad = 'PUBLICO' | 'PRIVADO' | 'PROTEGIDO';
+export type Visibilidad = 'PUBLICO' | 'PRIVADO' | 'PROTEGIDO' | 'PAQUETE';
+export type TipoRelacion =
+  | 'ASOCIACION'
+  | 'AGREGACION'
+  | 'COMPOSICION'
+  | 'HERENCIA'
+  | 'REALIZACION'
+  | 'TEMPLATE_BINDING';
 
 export interface UIClase {
   x: number;
@@ -10,7 +17,7 @@ export interface UIClase {
 export interface Atributo {
   id: string;
   nombre: string;
-  tipo: string;
+  tipo: string | null;
   es_pk: boolean;
   visibilidad: Visibilidad;
   orden: number;
@@ -24,7 +31,7 @@ export interface ParametroMetodo {
 export interface Metodo {
   id: string;
   nombre: string;
-  tipo_retorno: string;
+  tipo_retorno: string | null;
   parametros: ParametroMetodo[];
   visibilidad: Visibilidad;
   orden: number;
@@ -46,9 +53,11 @@ export interface Relacion {
   id: string;
   origen_id: string;
   destino_id: string;
-  tipo: string;
-  cardinalidad_origen: string;
-  cardinalidad_destino: string;
+  tipo: TipoRelacion;
+  cardinalidad_origen: string | null;
+  cardinalidad_destino: string | null;
+  etiqueta: string | null;
+  clase_asociada_id: string | null;
   ui: UIRelacion;
 }
 
