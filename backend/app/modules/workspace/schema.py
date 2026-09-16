@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.modules.workspace.model import RolColaborador
+from app.modules.workspace.model import EstadoColaborador, RolColaborador
 
 
 class UsuarioResumen(BaseModel):
@@ -44,10 +44,24 @@ class CambiarRolColaborador(BaseModel):
     rol: RolColaborador
 
 
+class ResponderInvitacion(BaseModel):
+    aceptar: bool
+
+
 class ColaboradorRespuesta(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     usuario: UsuarioResumen
+    rol: RolColaborador
+    estado: EstadoColaborador
+    unido_en: datetime
+
+
+class InvitacionRespuesta(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id_proyecto: int
+    proyecto: ProyectoRespuesta
     rol: RolColaborador
     unido_en: datetime
 
