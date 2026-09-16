@@ -2,7 +2,7 @@ import { Component, HostListener, computed, inject, signal, viewChild } from '@a
 import { ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
-import { TipoRelacion } from '../../../../core/models/lienzo.model';
+import { Clase, TipoRelacion } from '../../../../core/models/lienzo.model';
 import { obtenerMensajeError } from '../../../../core/utils/http-error.util';
 import { Colaborador, Proyecto, RolColaborador } from '../../../workspace/models/proyecto.model';
 import { WorkspaceApiService } from '../../../workspace/services/workspace-api.service';
@@ -59,6 +59,8 @@ export class Editor {
   readonly origenPendiente = signal<string | null>(null);
   readonly destinoPendiente = signal<string | null>(null);
   readonly tipoRelacionPropuesta = signal<TipoRelacion>('ASOCIACION');
+  readonly portapapeles = signal<Clase | null>(null);
+  private vecesPegado = 0;
 
   readonly esDueno = computed(() => {
     const usuario = this.authService.usuario();
@@ -88,11 +90,68 @@ export class Editor {
     const objetivo = evento.target as HTMLElement | null;
     const esCampoTexto = ['INPUT', 'TEXTAREA', 'SELECT'].includes(objetivo?.tagName ?? '');
     const esCtrlZ = (evento.ctrlKey || evento.metaKey) && evento.key.toLowerCase() === 'z' && !evento.shiftKey;
+    const esCtrlC = (evento.ctrlKey || evento.metaKey) && evento.key.toLowerCase() === 'c';
+    const esCtrlV = (evento.ctrlKey || evento.metaKey) && evento.key.toLowerCase() === 'v';
 
     if (esCtrlZ && !esCampoTexto && this.puedeEditar()) {
       evento.preventDefault();
       this.canvasService.deshacer();
+      return;
     }
+
+    if (esCtrlC && !esCampoTexto && this.claseSeleccionada()) {
+      evento.preventDefault();
+      this.copiarClaseSeleccionada();
+      return;
+    }
+
+    if (esCtrlV && !esCampoTexto && this.puedeEditar() && this.portapapeles()) {
+      evento.preventDefault();
+      this.pegarClaseCopiada();
+    }
+  }
+
+  private copiarClaseSeleccionada(): void {
+    const clase = this.claseSeleccionada();
+    if (!clase) {
+      return;
+    }
+    this.portapapeles.set(clase);
+    this.vecesPegado = 0;
+  }
+
+  private pegarClaseCopiada(): void {
+    const copia = this.portapapeles();
+    if (!copia) {
+      return;
+    }
+    this.vecesPegado += 1;
+    const x = copia.ui.x + 40 * this.vecesPegado;
+    const y = copia.ui.y + 40 * this.vecesPegado;
+
+    this.canvasService.crearClase(`${copia.nombre} (copia)`, x, y, (nuevaClase) => {
+      const atributos = Object.values(copia.atributos).sort((a, b) => a.orden - b.orden);
+      for (const atributo of atributos) {
+        this.canvasService.agregarAtributo(nuevaClase.id, {
+          nombre: atributo.nombre,
+          tipo: atributo.tipo,
+          es_pk: atributo.es_pk,
+          visibilidad: atributo.visibilidad,
+        });
+      }
+
+      const metodos = Object.values(copia.metodos).sort((a, b) => a.orden - b.orden);
+      for (const metodo of metodos) {
+        this.canvasService.agregarMetodo(nuevaClase.id, {
+          nombre: metodo.nombre,
+          tipo_retorno: metodo.tipo_retorno,
+          parametros: metodo.parametros,
+          visibilidad: metodo.visibilidad,
+        });
+      }
+
+      this.claseSeleccionadaId.set(nuevaClase.id);
+    });
   }
 
   private cargar(): void {
