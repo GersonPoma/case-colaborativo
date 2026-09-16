@@ -101,6 +101,12 @@ h2 {
   }
 }
 
+.descripcion-seccion {
+  margin: 0 0 0.75rem;
+  color: #666;
+  font-size: 0.85rem;
+}
+
 .zona-peligro {
   margin-top: 2rem;
   padding-top: 1rem;
@@ -108,6 +114,7 @@ h2 {
 }
 
 .boton-primario,
+.boton-secundario,
 .boton-texto,
 .boton-peligro {
   border-radius: 6px;
@@ -115,6 +122,17 @@ h2 {
   cursor: pointer;
   font-size: 0.85rem;
   text-decoration: none;
+}
+
+.boton-secundario {
+  background: #fff;
+  color: #444;
+  border: 1px solid #ccc;
+  padding: 0.55rem 1rem;
+
+  &:hover {
+    background: #f5f6fa;
+  }
 }
 
 .boton-primario {

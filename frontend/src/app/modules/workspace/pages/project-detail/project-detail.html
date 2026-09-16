@@ -83,6 +83,18 @@
       </section>
     }
 
+    @if (puedeConfigurarTranspilacion()) {
+      <section>
+        <h2>Interoperabilidad</h2>
+        <p class="descripcion-seccion">
+          Configurá los parámetros para generar el proyecto Spring Boot a partir de este diagrama.
+        </p>
+        <button type="button" class="boton-secundario" (click)="abrirConfigTranspilacion()">
+          Configurar transpilación
+        </button>
+      </section>
+    }
+
     @if (esDueno()) {
       <section class="zona-peligro">
         <h2>Zona peligrosa</h2>
@@ -107,3 +119,9 @@
     <app-diagram-preview [lienzo]="lienzoPreview()" />
   }
 </app-modal>
+
+<app-codegen-config
+  [abierto]="mostrarConfigTranspilacion()"
+  [proyectoId]="proyectoId"
+  (cerrado)="cerrarConfigTranspilacion()"
+/>

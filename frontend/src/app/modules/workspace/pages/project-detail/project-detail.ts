@@ -7,12 +7,13 @@ import { obtenerMensajeError } from '../../../../core/utils/http-error.util';
 import { DiagramPreview } from '../../../../shared/components/diagram-preview/diagram-preview';
 import { Modal } from '../../../../shared/components/modal/modal';
 import { Paginador } from '../../../../shared/components/paginador/paginador';
+import { CodegenConfig } from '../../../interoperability/components/codegen-config/codegen-config';
 import { Colaborador, HistorialVersionResumen, Proyecto } from '../../models/proyecto.model';
 import { WorkspaceApiService } from '../../services/workspace-api.service';
 
 @Component({
   selector: 'app-project-detail',
-  imports: [RouterLink, DatePipe, Modal, DiagramPreview, Paginador],
+  imports: [RouterLink, DatePipe, Modal, DiagramPreview, Paginador, CodegenConfig],
   templateUrl: './project-detail.html',
   styleUrl: './project-detail.scss',
 })
@@ -22,7 +23,7 @@ export class ProjectDetail {
   private readonly workspaceApi = inject(WorkspaceApiService);
   private readonly authService = inject(AuthService);
 
-  private readonly proyectoId = Number(this.route.snapshot.paramMap.get('id'));
+  protected readonly proyectoId = Number(this.route.snapshot.paramMap.get('id'));
 
   readonly proyecto = signal<Proyecto | null>(null);
   readonly colaboradores = signal<Colaborador[]>([]);
@@ -36,11 +37,21 @@ export class ProjectDetail {
   readonly mostrarPreview = signal(false);
   readonly cargandoPreview = signal(false);
   readonly lienzoPreview = signal<EstadoLienzo | null>(null);
+  readonly mostrarConfigTranspilacion = signal(false);
 
   readonly esDueno = computed(() => {
     const usuario = this.authService.usuario();
     const proyecto = this.proyecto();
     return !!usuario && !!proyecto && usuario.id === proyecto.id_dueno;
+  });
+
+  readonly puedeConfigurarTranspilacion = computed(() => {
+    if (this.esDueno()) {
+      return true;
+    }
+    const usuario = this.authService.usuario();
+    const propio = this.colaboradores().find((c) => c.usuario.id === usuario?.id);
+    return propio?.rol === 'EDITOR';
   });
 
   constructor() {
@@ -120,6 +131,14 @@ export class ProjectDetail {
   cerrarPreview(): void {
     this.mostrarPreview.set(false);
     this.lienzoPreview.set(null);
+  }
+
+  abrirConfigTranspilacion(): void {
+    this.mostrarConfigTranspilacion.set(true);
+  }
+
+  cerrarConfigTranspilacion(): void {
+    this.mostrarConfigTranspilacion.set(false);
   }
 
   restaurar(historialId: number): void {
