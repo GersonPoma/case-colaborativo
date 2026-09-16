@@ -1,4 +1,4 @@
-import { Component, effect, inject, input, signal } from '@angular/core';
+import { Component, effect, inject, input, signal, untracked } from '@angular/core';
 import { ChatPanel } from '../chat-panel/chat-panel';
 import { CanvasService } from '../../services/canvas.service';
 
@@ -23,11 +23,19 @@ export class CollaborationPanel {
   readonly noLeidosChat = signal(0);
 
   constructor() {
+    // solo debe reaccionar a que llegue un mensaje NUEVO, no a que cambien
+    // "minimizado"/"pestanaActiva" — por eso esos dos se leen con untracked,
+    // así no quedan como dependencias que reejecuten esto con el mismo mensaje.
     effect(() => {
       const mensaje = this.canvasService.ultimoMensajeChat();
-      if (mensaje && (this.minimizado() || this.pestanaActiva() !== 'chat')) {
-        this.noLeidosChat.update((n) => n + 1);
+      if (!mensaje) {
+        return;
       }
+      untracked(() => {
+        if (this.minimizado() || this.pestanaActiva() !== 'chat') {
+          this.noLeidosChat.update((n) => n + 1);
+        }
+      });
     });
   }
 
