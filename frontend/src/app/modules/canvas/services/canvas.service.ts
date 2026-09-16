@@ -61,6 +61,13 @@ interface ConfirmacionPendiente {
   resolver: (datos: any) => void;
 }
 
+export interface CursorRemoto {
+  usuarioId: number;
+  username: string;
+  x: number;
+  y: number;
+}
+
 @Injectable()
 export class CanvasService implements OnDestroy {
   private readonly authService = inject(AuthService);
@@ -76,9 +83,23 @@ export class CanvasService implements OnDestroy {
   readonly error = signal<string | null>(null);
   readonly puedeDeshacer = signal(false);
   readonly ultimoMensajeChat = signal<MensajeChat | null>(null);
+  readonly cursores = signal<Map<number, CursorRemoto>>(new Map());
+
+  private ultimoEnvioCursor = 0;
 
   inicializar(estado: EstadoLienzo): void {
     this.lienzo.set(estado);
+  }
+
+  moverCursor(x: number, y: number): void {
+    const ahora = Date.now();
+    if (ahora - this.ultimoEnvioCursor < 60) {
+      return;
+    }
+    this.ultimoEnvioCursor = ahora;
+    if (this.socket?.readyState === WebSocket.OPEN) {
+      this.socket.send(JSON.stringify({ tipo: 'CURSOR', x, y }));
+    }
   }
 
   deshacer(): void {
@@ -320,6 +341,9 @@ export class CanvasService implements OnDestroy {
     accion?: AccionCanvas;
     datos?: any;
     usuario_id?: number;
+    username?: string;
+    x?: number;
+    y?: number;
     error?: string;
   }): void {
     if (mensaje.error) {
@@ -328,6 +352,29 @@ export class CanvasService implements OnDestroy {
     }
     if (mensaje.tipo === 'MENSAJE_CHAT' && mensaje.mensaje) {
       this.ultimoMensajeChat.set(mensaje.mensaje);
+      return;
+    }
+    if (
+      mensaje.tipo === 'CURSOR' &&
+      mensaje.usuario_id !== undefined &&
+      mensaje.username &&
+      mensaje.x !== undefined &&
+      mensaje.y !== undefined
+    ) {
+      const mapa = new Map(this.cursores());
+      mapa.set(mensaje.usuario_id, {
+        usuarioId: mensaje.usuario_id,
+        username: mensaje.username,
+        x: mensaje.x,
+        y: mensaje.y,
+      });
+      this.cursores.set(mapa);
+      return;
+    }
+    if (mensaje.tipo === 'CURSOR_SALIO' && mensaje.usuario_id !== undefined) {
+      const mapa = new Map(this.cursores());
+      mapa.delete(mensaje.usuario_id);
+      this.cursores.set(mapa);
       return;
     }
     if (mensaje.accion) {
