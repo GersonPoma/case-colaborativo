@@ -77,6 +77,7 @@ async def canvas_websocket(
         return
 
     usuario_id = usuario.id
+    username = usuario.username
 
     proyecto_service = ProyectoService(db)
     try:
@@ -101,6 +102,19 @@ async def canvas_websocket(
     try:
         while True:
             bruto = await websocket.receive_json()
+
+            # cursores en vivo: van por el mismo socket pero no son una AccionCanvas
+            # (no se persisten, no requieren permiso de edición, y no se le devuelven
+            # al que las mandó porque ya conoce su propia posición del mouse)
+            if bruto.get("tipo") == "CURSOR":
+                x, y = bruto.get("x"), bruto.get("y")
+                if isinstance(x, (int, float)) and isinstance(y, (int, float)):
+                    await manager.difundir(
+                        proyecto_id,
+                        {"tipo": "CURSOR", "usuario_id": usuario_id, "username": username, "x": x, "y": y},
+                        excluir=websocket,
+                    )
+                continue
 
             try:
                 mensaje = MensajeEntrante.model_validate(bruto)
@@ -131,3 +145,4 @@ async def canvas_websocket(
         pass
     finally:
         manager.desconectar(proyecto_id, websocket)
+        await manager.difundir(proyecto_id, {"tipo": "CURSOR_SALIO", "usuario_id": usuario_id})
