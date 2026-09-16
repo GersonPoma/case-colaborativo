@@ -120,30 +120,18 @@ select {
   }
 }
 
-.info-colaborador {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
 .username {
   font-weight: 600;
   color: #333;
 }
 
-.etiqueta-estado {
-  display: inline-block;
-  font-size: 0.7rem;
-  font-weight: 600;
-  padding: 0.15rem 0.5rem;
-  border-radius: 999px;
-  background: #fff4e0;
-  color: #a86200;
-
-  &.rechazado {
-    background: #fdecea;
-    color: #b3261e;
-  }
+.aviso-exito {
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 0.6rem 0.85rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  margin: 0 0 1.5rem;
 }
 
 .acciones-colaborador {

@@ -41,6 +41,13 @@
           <p class="field-error"></p>
         </div>
       </form>
+
+      @if (invitacionEnviada()) {
+        <p class="aviso-exito">
+          Invitación enviada a {{ invitacionEnviada() }}. Aparecerá como colaborador cuando la
+          acepte.
+        </p>
+      }
     }
 
     @if (colaboradores().length === 0) {
@@ -49,17 +56,7 @@
       <ul class="lista-colaboradores">
         @for (colaborador of colaboradores(); track colaborador.usuario.id) {
           <li>
-            <div class="info-colaborador">
-              <span class="username">{{ colaborador.usuario.username }}</span>
-              @if (colaborador.estado !== 'ACEPTADO') {
-                <span
-                  class="etiqueta-estado"
-                  [class.rechazado]="colaborador.estado === 'RECHAZADO'"
-                >
-                  {{ colaborador.estado === 'PENDIENTE' ? 'Invitación pendiente' : 'Rechazada' }}
-                </span>
-              }
-            </div>
+            <span class="username">{{ colaborador.usuario.username }}</span>
 
             @if (esDueno()) {
               <div class="acciones-colaborador">
