@@ -1,0 +1,87 @@
+h2 {
+  margin: 0 0 0.25rem;
+}
+
+.ayuda {
+  margin: 0 0 1rem;
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.estado {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 0.75rem;
+
+  label {
+    font-size: 0.8rem;
+    color: #555;
+  }
+
+  input,
+  select {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+  }
+}
+
+.field-error {
+  color: #b3261e;
+  font-size: 0.75rem;
+  margin: 0;
+}
+
+.fila {
+  display: flex;
+  gap: 0.75rem;
+
+  .campo {
+    flex: 1;
+  }
+}
+
+.acciones-form {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.boton-primario {
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.boton-secundario {
+  background: #eee;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+.error {
+  background: #fdecea;
+  color: #b3261e;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  margin: 0 0 0.75rem;
+}

@@ -1,1 +1,80 @@
-<p>codegen-config works!</p>
+<app-modal [abierto]="abierto()" ancho="420px" (cerrado)="cerrar()">
+  <h2>Configurar transpilación a Spring Boot</h2>
+  <p class="ayuda">
+    Estos datos se usan para generar el proyecto Java (pom.xml y paquetes) cuando exportes el
+    código.
+  </p>
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  @if (cargando()) {
+    <p class="estado">Cargando configuración...</p>
+  } @else {
+    <form [formGroup]="formulario" (ngSubmit)="guardar()">
+      <div class="campo">
+        <label for="group_id">Group ID</label>
+        <input id="group_id" type="text" formControlName="group_id" placeholder="com.miempresa" />
+        @if (formulario.controls.group_id.invalid && formulario.controls.group_id.touched) {
+          <p class="field-error">Este campo es obligatorio</p>
+        }
+      </div>
+
+      <div class="campo">
+        <label for="artifact_id">Artifact ID</label>
+        <input
+          id="artifact_id"
+          type="text"
+          formControlName="artifact_id"
+          placeholder="sistema-ventas"
+        />
+        @if (formulario.controls.artifact_id.invalid && formulario.controls.artifact_id.touched) {
+          <p class="field-error">Este campo es obligatorio</p>
+        }
+      </div>
+
+      <div class="fila">
+        <div class="campo">
+          <label for="java_version">Versión de Java</label>
+          <select id="java_version" formControlName="java_version">
+            <option value="17">17</option>
+            <option value="21">21</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label for="base_datos">Base de datos</label>
+          <select id="base_datos" formControlName="base_datos">
+            <option value="POSTGRESQL">PostgreSQL</option>
+            <option value="MYSQL">MySQL</option>
+            <option value="H2">H2 (en memoria)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label for="spring_boot_version">Versión de Spring Boot</label>
+        <input
+          id="spring_boot_version"
+          type="text"
+          formControlName="spring_boot_version"
+          placeholder="3.2.0"
+        />
+        @if (
+          formulario.controls.spring_boot_version.invalid &&
+          formulario.controls.spring_boot_version.touched
+        ) {
+          <p class="field-error">Este campo es obligatorio</p>
+        }
+      </div>
+
+      <div class="acciones-form">
+        <button type="button" class="boton-secundario" (click)="cerrar()">Cancelar</button>
+        <button type="submit" class="boton-primario" [disabled]="guardando()">
+          {{ guardando() ? 'Guardando...' : 'Guardar' }}
+        </button>
+      </div>
+    </form>
+  }
+</app-modal>
