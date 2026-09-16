@@ -110,7 +110,7 @@ export class ChatPanel implements OnInit {
         this.hayMas.set(siguientePagina < respuesta.total_paginas);
         this.cargandoMas.set(false);
 
-        queueMicrotask(() => {
+        setTimeout(() => {
           if (elemento) {
             elemento.scrollTop = elemento.scrollHeight - alturaAnterior;
           }
@@ -145,7 +145,10 @@ export class ChatPanel implements OnInit {
   }
 
   private desplazarAlFondo(): void {
-    queueMicrotask(() => {
+    // setTimeout (no queueMicrotask): hace falta esperar a que Angular
+    // termine de pintar los mensajes nuevos en el DOM antes de leer
+    // scrollHeight, si no el valor queda desactualizado y no baja del todo.
+    setTimeout(() => {
       const elemento = this.lista()?.nativeElement;
       if (elemento) {
         elemento.scrollTop = elemento.scrollHeight;
