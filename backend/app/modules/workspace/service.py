@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import ConflictError, ForbiddenError, NotFoundError
@@ -5,6 +7,7 @@ from app.core.pagination import ParametrosPaginacion
 from app.modules.auth.repository import UsuarioRepository
 from app.modules.workspace.model import (
     Colaborador,
+    EstadoColaborador,
     HistorialVersiones,
     MensajeChat,
     Proyecto,
@@ -22,6 +25,7 @@ from app.modules.workspace.schema import (
     EnviarMensaje,
     InvitarColaborador,
     MensajeChatRespuesta,
+    ResponderInvitacion,
 )
 from app.websocket.manager import manager
 
@@ -58,14 +62,18 @@ class ProyectoService:
         if proyecto.id_dueno == id_usuario:
             return
         colaborador = await self.colaborador_repository.get(proyecto.id, id_usuario)
-        if colaborador is None:
+        if colaborador is None or colaborador.estado != EstadoColaborador.ACEPTADO:
             raise ForbiddenError("No tienes acceso a este proyecto")
 
     async def verificar_editor(self, proyecto: Proyecto, id_usuario: int) -> None:
         if proyecto.id_dueno == id_usuario:
             return
         colaborador = await self.colaborador_repository.get(proyecto.id, id_usuario)
-        if colaborador is None or colaborador.rol != RolColaborador.EDITOR:
+        if (
+            colaborador is None
+            or colaborador.estado != EstadoColaborador.ACEPTADO
+            or colaborador.rol != RolColaborador.EDITOR
+        ):
             raise ForbiddenError("No tienes permisos de edición en este proyecto")
 
     async def eliminar(self, proyecto_id: int, id_usuario: int) -> None:
@@ -107,14 +115,53 @@ class ColaboradorService:
         if usuario.id == proyecto.id_dueno:
             raise ConflictError("El dueño ya tiene acceso total al proyecto")
 
-        if await self.colaborador_repository.get(proyecto_id, usuario.id):
-            raise ConflictError("El usuario ya es colaborador de este proyecto")
+        existente = await self.colaborador_repository.get(proyecto_id, usuario.id)
+        if existente is not None:
+            if existente.estado == EstadoColaborador.ACEPTADO:
+                raise ConflictError("El usuario ya es colaborador de este proyecto")
+            if existente.estado == EstadoColaborador.PENDIENTE:
+                raise ConflictError("El usuario ya tiene una invitación pendiente")
 
-        colaborador = Colaborador(id_proyecto=proyecto_id, id_usuario=usuario.id, rol=datos.rol)
+            # RECHAZADO: se reenvía la invitación reutilizando la misma fila
+            existente.estado = EstadoColaborador.PENDIENTE
+            existente.rol = datos.rol
+            await self.db.commit()
+            await self.db.refresh(existente)
+            existente.usuario = usuario
+            return existente
+
+        colaborador = Colaborador(
+            id_proyecto=proyecto_id,
+            id_usuario=usuario.id,
+            rol=datos.rol,
+            estado=EstadoColaborador.PENDIENTE,
+        )
         await self.colaborador_repository.create(colaborador)
         await self.db.commit()
         await self.db.refresh(colaborador)
         colaborador.usuario = usuario
+        return colaborador
+
+    async def listar_invitaciones_pendientes(
+        self, id_usuario: int, params: ParametrosPaginacion
+    ) -> tuple[list[Colaborador], int]:
+        return await self.colaborador_repository.list_pendientes_por_usuario(id_usuario, params)
+
+    async def responder_invitacion(
+        self, proyecto_id: int, id_usuario_invitado: int, datos: ResponderInvitacion
+    ) -> Colaborador:
+        colaborador = await self.colaborador_repository.get(proyecto_id, id_usuario_invitado)
+        if colaborador is None or colaborador.estado != EstadoColaborador.PENDIENTE:
+            raise NotFoundError("No tienes una invitación pendiente para este proyecto")
+
+        if datos.aceptar:
+            colaborador.estado = EstadoColaborador.ACEPTADO
+            colaborador.unido_en = datetime.now(timezone.utc)
+        else:
+            colaborador.estado = EstadoColaborador.RECHAZADO
+
+        await self.db.commit()
+        await self.db.refresh(colaborador)
         return colaborador
 
     async def cambiar_rol(
