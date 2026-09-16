@@ -30,6 +30,7 @@ export class Collaborators {
   readonly error = signal<string | null>(null);
   readonly invitando = signal(false);
   readonly procesandoUsuarioId = signal<number | null>(null);
+  readonly invitacionEnviada = signal<string | null>(null);
 
   readonly esDueno = computed(() => {
     const usuario = this.authService.usuario();
@@ -86,11 +87,14 @@ export class Collaborators {
 
     this.invitando.set(true);
     this.error.set(null);
+    this.invitacionEnviada.set(null);
+
+    const username = this.formulario.getRawValue().username;
 
     this.workspaceApi.invitarColaborador(this.proyectoId, this.formulario.getRawValue()).subscribe({
-      next: (colaborador) => {
-        this.colaboradores.update((lista) => [...lista, colaborador]);
+      next: () => {
         this.invitando.set(false);
+        this.invitacionEnviada.set(username);
         this.formulario.reset({ username: '', rol: 'LECTOR' });
       },
       error: (err: unknown) => {
