@@ -1,1 +1,12 @@
 <div #contenedor class="canvas-board"></div>
+
+<div class="cursores-overlay">
+  @for (cursor of posicionesCursores(); track cursor.usuarioId) {
+    <div class="cursor-remoto" [style.left.px]="cursor.left" [style.top.px]="cursor.top">
+      <svg width="18" height="18" viewBox="0 0 18 18">
+        <path d="M1 1 L1 15 L5 11.5 L7.5 17 L10 16 L7.5 10.5 L13 10.5 Z" [attr.fill]="cursor.color" />
+      </svg>
+      <span class="etiqueta" [style.background]="cursor.color">{{ cursor.username }}</span>
+    </div>
+  }
+</div>

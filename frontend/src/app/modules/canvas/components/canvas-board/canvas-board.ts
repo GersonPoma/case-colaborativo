@@ -9,15 +9,26 @@ import {
   inject,
   input,
   output,
+  signal,
   viewChild,
 } from '@angular/core';
 import { Graph } from '@antv/x6';
 import { EstadoLienzo, TipoRelacion } from '../../../../core/models/lienzo.model';
 import { sincronizarClases, sincronizarRelaciones } from '../../../../shared/utils/x6-uml.util';
+import { CursorRemoto } from '../../services/canvas.service';
 
 export type ModoCanvas = 'seleccionar' | 'crear-clase' | TipoRelacion | 'clase-asociada';
 
 const COLOR_SELECCION = '#1976d2';
+const COLORES_CURSOR = ['#e53935', '#8e24aa', '#3949ab', '#00897b', '#f4511e', '#6d4c41'];
+
+interface CursorPosicionado {
+  usuarioId: number;
+  username: string;
+  left: number;
+  top: number;
+  color: string;
+}
 
 @Component({
   selector: 'app-canvas-board',
@@ -33,12 +44,16 @@ export class CanvasBoard implements AfterViewInit, OnDestroy {
   readonly lienzo = input<EstadoLienzo | null>(null);
   readonly soloLectura = input(false);
   readonly modo = input<ModoCanvas>('seleccionar');
+  readonly cursores = input<Map<number, CursorRemoto>>(new Map());
 
   readonly claseSeleccionada = output<string | null>();
   readonly relacionSeleccionada = output<string | null>();
   readonly claseMovida = output<{ claseId: string; x: number; y: number }>();
   readonly relacionPropuesta = output<{ origenId: string; destinoId: string }>();
   readonly crearClaseSolicitada = output<{ x: number; y: number }>();
+  readonly cursorMovido = output<{ x: number; y: number }>();
+
+  readonly posicionesCursores = signal<CursorPosicionado[]>([]);
 
   private graph: Graph | null = null;
   private claseSeleccionadaId: string | null = null;
@@ -58,6 +73,11 @@ export class CanvasBoard implements AfterViewInit, OnDestroy {
     effect(() => {
       this.modo();
       this.cancelarSeleccionRelacion();
+    });
+
+    effect(() => {
+      this.cursores();
+      this.recalcularPosicionesCursores();
     });
   }
 
@@ -84,6 +104,16 @@ export class CanvasBoard implements AfterViewInit, OnDestroy {
     });
     this.graph.on('edge:click', ({ edge }) => this.alClickEdge(edge.id));
     this.graph.on('blank:click', ({ x, y }) => this.alClickVacio(x, y));
+    this.graph.on('translate', () => this.recalcularPosicionesCursores());
+    this.graph.on('scale', () => this.recalcularPosicionesCursores());
+
+    elemento.addEventListener('mousemove', (e: MouseEvent) => {
+      if (!this.graph) {
+        return;
+      }
+      const punto = this.graph.clientToLocal(e.clientX, e.clientY);
+      this.cursorMovido.emit({ x: Math.round(punto.x), y: Math.round(punto.y) });
+    });
 
     // el layout flex del editor cambia el ancho disponible cuando se abre o
     // cierra el panel lateral. OJO: hay que observar el HOST del componente
@@ -96,6 +126,7 @@ export class CanvasBoard implements AfterViewInit, OnDestroy {
       if (entrada && this.graph) {
         const { width, height } = entrada.contentRect;
         this.graph.resize(width, height);
+        this.recalcularPosicionesCursores();
       }
     });
     this.observadorTamano.observe(this.hostRef.nativeElement);
@@ -218,5 +249,23 @@ export class CanvasBoard implements AfterViewInit, OnDestroy {
     if (this.origenRelacion) {
       this.resaltarNodo(this.origenRelacion, true);
     }
+  }
+
+  private recalcularPosicionesCursores(): void {
+    if (!this.graph) {
+      return;
+    }
+    const contRect = this.hostRef.nativeElement.getBoundingClientRect();
+    const posiciones = Array.from(this.cursores().values()).map((cursor) => {
+      const punto = this.graph!.localToClient(cursor.x, cursor.y);
+      return {
+        usuarioId: cursor.usuarioId,
+        username: cursor.username,
+        left: punto.x - contRect.left,
+        top: punto.y - contRect.top,
+        color: COLORES_CURSOR[cursor.usuarioId % COLORES_CURSOR.length],
+      };
+    });
+    this.posicionesCursores.set(posiciones);
   }
 }

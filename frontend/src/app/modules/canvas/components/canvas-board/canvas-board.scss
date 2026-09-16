@@ -1,5 +1,6 @@
 :host {
   display: block;
+  position: relative;
   flex: 1;
   min-width: 0;
   height: 100%;
@@ -12,4 +13,28 @@
   background: #fafafa;
   background-image: radial-gradient(#ddd 1px, transparent 1px);
   background-size: 16px 16px;
+}
+
+.cursores-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.cursor-remoto {
+  position: absolute;
+  transform: translate(0, 0);
+  transition: left 0.08s linear, top 0.08s linear;
+}
+
+.etiqueta {
+  position: absolute;
+  top: 16px;
+  left: 14px;
+  white-space: nowrap;
+  color: #fff;
+  font-size: 0.7rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
 }

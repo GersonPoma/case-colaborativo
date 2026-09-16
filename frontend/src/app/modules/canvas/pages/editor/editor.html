@@ -31,11 +31,13 @@
         [lienzo]="canvasService.lienzo()"
         [soloLectura]="!puedeEditar()"
         [modo]="modo()"
+        [cursores]="canvasService.cursores()"
         (claseSeleccionada)="alClaseSeleccionada($event)"
         (relacionSeleccionada)="alRelacionSeleccionada($event)"
         (claseMovida)="alClaseMovida($event)"
         (relacionPropuesta)="alRelacionPropuesta($event)"
         (crearClaseSolicitada)="alCrearClaseEnPosicion($event)"
+        (cursorMovido)="canvasService.moverCursor($event.x, $event.y)"
       />
 
       <app-collaboration-panel [proyectoId]="proyectoId" />
