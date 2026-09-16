@@ -46,8 +46,8 @@ export class DiagramPreview implements AfterViewInit, OnDestroy {
 
     this.graph = new Graph({
       container: elemento,
-      width: elemento.clientWidth || 600,
-      height: 400,
+      width: elemento.clientWidth || 800,
+      height: elemento.clientHeight || 560,
       interacting: false,
       panning: true,
       mousewheel: true,
