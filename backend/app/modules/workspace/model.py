@@ -33,6 +33,9 @@ class Proyecto(BaseAuditable, Base):
     colaboradores = relationship("Colaborador", back_populates="proyecto")
     historial_versiones = relationship("HistorialVersiones", back_populates="proyecto")
     mensajes_chat = relationship("MensajeChat", back_populates="proyecto")
+    configuracion_transpilacion = relationship(
+        "ConfiguracionTranspilacion", back_populates="proyecto", uselist=False
+    )
 
 
 class Colaborador(Base):

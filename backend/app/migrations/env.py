@@ -8,6 +8,7 @@ from app.config.settings import settings
 
 # Importa aquí los modelos de cada módulo para que Alembic los detecte en el autogenerate
 from app.modules.auth.model import Perfil, Usuario  # noqa: F401
+from app.modules.interoperability.model import ConfiguracionTranspilacion  # noqa: F401
 from app.modules.workspace.model import (  # noqa: F401
     Colaborador,
     HistorialVersiones,
