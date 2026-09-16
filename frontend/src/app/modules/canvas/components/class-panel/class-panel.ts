@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Atributo, Clase, Metodo, ParametroMetodo, Visibilidad } from '../../../../core/models/lienzo.model';
@@ -6,7 +7,7 @@ import { CanvasService } from '../../services/canvas.service';
 
 @Component({
   selector: 'app-class-panel',
-  imports: [ReactiveFormsModule, Modal],
+  imports: [ReactiveFormsModule, Modal, NgTemplateOutlet],
   templateUrl: './class-panel.html',
   styleUrl: './class-panel.scss',
 })
@@ -23,6 +24,7 @@ export class ClassPanel {
   readonly editandoAtributoId = signal<string | null>(null);
   readonly editandoMetodoId = signal<string | null>(null);
   readonly mostrarConfirmarEliminar = signal(false);
+  readonly pestanaActiva = signal<'atributos' | 'metodos'>('atributos');
 
   readonly atributosOrdenados = computed(() =>
     Object.values(this.clase().atributos).sort((a, b) => a.orden - b.orden),

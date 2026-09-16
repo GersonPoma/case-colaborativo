@@ -19,7 +19,7 @@
       <p class="error flotante">{{ error() }}</p>
     }
 
-    <div class="editor-body">
+    <div class="editor-medio">
       <app-toolbox
         [modo]="modo()"
         [puedeEditar]="puedeEditar()"
@@ -38,10 +38,12 @@
         (crearClaseSolicitada)="alCrearClaseEnPosicion($event)"
       />
 
-      @if (claseSeleccionada(); as clase) {
-        <app-class-panel [clase]="clase" [soloLectura]="!puedeEditar()" (cerrar)="alClaseSeleccionada(null)" />
-      }
+      <app-chat-panel [proyectoId]="proyectoId" />
     </div>
+
+    @if (claseSeleccionada(); as clase) {
+      <app-class-panel [clase]="clase" [soloLectura]="!puedeEditar()" (cerrar)="alClaseSeleccionada(null)" />
+    }
   </div>
 
   <app-relation-form

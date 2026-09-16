@@ -7,6 +7,7 @@ import { obtenerMensajeError } from '../../../../core/utils/http-error.util';
 import { Colaborador, Proyecto, RolColaborador } from '../../../workspace/models/proyecto.model';
 import { WorkspaceApiService } from '../../../workspace/services/workspace-api.service';
 import { CanvasBoard, ModoCanvas } from '../../components/canvas-board/canvas-board';
+import { ChatPanel } from '../../components/chat-panel/chat-panel';
 import { ClassPanel } from '../../components/class-panel/class-panel';
 import { RelationForm } from '../../components/relation-form/relation-form';
 import { Toolbar } from '../../components/toolbar/toolbar';
@@ -29,7 +30,7 @@ function esTipoRelacion(modo: ModoCanvas): modo is TipoRelacion {
 
 @Component({
   selector: 'app-editor',
-  imports: [Toolbar, Toolbox, CanvasBoard, ClassPanel, RelationForm],
+  imports: [Toolbar, Toolbox, CanvasBoard, ClassPanel, RelationForm, ChatPanel],
   templateUrl: './editor.html',
   styleUrl: './editor.scss',
   providers: [CanvasService],

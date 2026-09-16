@@ -1,5 +1,5 @@
 <div class="panel">
-  <header class="panel-header">
+  <header class="encabezado">
     @if (editandoNombre()) {
       <form class="form-nombre" [formGroup]="formNombre" (ngSubmit)="guardarNombre()">
         <input type="text" formControlName="nombre" autocomplete="off" />
@@ -8,145 +8,212 @@
     } @else {
       <h3 (click)="!soloLectura() && iniciarEdicionNombre()">{{ clase().nombre }}</h3>
     }
+
+    <span class="espaciador"></span>
+
+    @if (!soloLectura()) {
+      <button type="button" class="boton-peligro-sm" (click)="eliminarClase()">Eliminar clase</button>
+    }
     <button type="button" class="boton-cerrar" (click)="cerrar.emit()">×</button>
   </header>
 
-  <section class="bloque">
-    <div class="bloque-header">
-      <h4>Atributos</h4>
-      @if (!soloLectura() && editandoAtributoId() === null) {
-        <button type="button" class="boton-texto" (click)="iniciarNuevoAtributo()">+ Agregar</button>
-      }
-    </div>
+  <nav class="pestanas">
+    <button
+      type="button"
+      class="pestana"
+      [class.activa]="pestanaActiva() === 'atributos'"
+      (click)="pestanaActiva.set('atributos')"
+    >
+      Atributos
+    </button>
+    <button
+      type="button"
+      class="pestana"
+      [class.activa]="pestanaActiva() === 'metodos'"
+      (click)="pestanaActiva.set('metodos')"
+    >
+      Métodos
+    </button>
+  </nav>
 
-    @if (editandoAtributoId() === 'nuevo') {
-      <form class="form-miembro" [formGroup]="formAtributo" (ngSubmit)="guardarAtributo()">
-        <input type="text" formControlName="nombre" placeholder="nombre" autocomplete="off" />
-        <input type="text" formControlName="tipo" placeholder="tipo (opcional)" autocomplete="off" />
-        <select formControlName="visibilidad">
-          <option value="PUBLICO">+ público</option>
-          <option value="PRIVADO">- privado</option>
-          <option value="PROTEGIDO"># protegido</option>
-          <option value="PAQUETE">~ paquete</option>
-        </select>
-        <label class="check"><input type="checkbox" formControlName="es_pk" /> PK</label>
-        <div class="acciones-miembro">
-          <button type="button" class="boton-texto" (click)="cancelarAtributo()">Cancelar</button>
-          <button type="submit" class="boton-primario-sm">Agregar</button>
-        </div>
-      </form>
-    }
-
-    <ul class="lista-miembros">
-      @for (atributo of atributosOrdenados(); track atributo.id) {
-        @if (editandoAtributoId() === atributo.id) {
-          <li>
-            <form class="form-miembro" [formGroup]="formAtributo" (ngSubmit)="guardarAtributo()">
-              <input type="text" formControlName="nombre" placeholder="nombre" autocomplete="off" />
-              <input type="text" formControlName="tipo" placeholder="tipo (opcional)" autocomplete="off" />
-              <select formControlName="visibilidad">
-                <option value="PUBLICO">+ público</option>
-                <option value="PRIVADO">- privado</option>
-                <option value="PROTEGIDO"># protegido</option>
-                <option value="PAQUETE">~ paquete</option>
-              </select>
-              <label class="check"><input type="checkbox" formControlName="es_pk" /> PK</label>
-              <div class="acciones-miembro">
-                <button type="button" class="boton-texto" (click)="cancelarAtributo()">Cancelar</button>
-                <button type="submit" class="boton-primario-sm">Guardar</button>
-              </div>
-            </form>
-          </li>
-        } @else {
-          <li class="miembro">
-            <span class="miembro-texto">
-              {{ simboloVisibilidad(atributo.visibilidad) }} {{ atributo.nombre
-              }}{{ atributo.tipo ? ': ' + atributo.tipo : '' }}{{ atributo.es_pk ? ' {PK}' : '' }}
-            </span>
-            @if (!soloLectura()) {
-              <span class="miembro-acciones">
-                <button type="button" class="boton-icono" (click)="iniciarEdicionAtributo(atributo)">✎</button>
-                <button type="button" class="boton-icono" (click)="eliminarAtributo(atributo)">🗑</button>
-              </span>
+  <div class="contenido">
+    @if (pestanaActiva() === 'atributos') {
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Tipo</th>
+            <th>Vis.</th>
+            <th>PK</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (atributo of atributosOrdenados(); track atributo.id) {
+            @if (editandoAtributoId() === atributo.id) {
+              <tr class="fila-edicion">
+                <td colspan="5">
+                  <form class="form-fila" [formGroup]="formAtributo" (ngSubmit)="guardarAtributo()">
+                    <input type="text" formControlName="nombre" placeholder="nombre" autocomplete="off" />
+                    <input type="text" formControlName="tipo" placeholder="tipo (opcional)" autocomplete="off" />
+                    <select formControlName="visibilidad">
+                      <option value="PUBLICO">+ público</option>
+                      <option value="PRIVADO">- privado</option>
+                      <option value="PROTEGIDO"># protegido</option>
+                      <option value="PAQUETE">~ paquete</option>
+                    </select>
+                    <label class="check"><input type="checkbox" formControlName="es_pk" /> PK</label>
+                    <button type="submit" class="boton-primario-sm">Guardar</button>
+                    <button type="button" class="boton-texto" (click)="cancelarAtributo()">Cancelar</button>
+                  </form>
+                </td>
+              </tr>
+            } @else {
+              <tr (click)="!soloLectura() && iniciarEdicionAtributo(atributo)">
+                <td>{{ simboloVisibilidad(atributo.visibilidad) }} {{ atributo.nombre }}</td>
+                <td>{{ atributo.tipo || '—' }}</td>
+                <td>{{ atributo.visibilidad }}</td>
+                <td>{{ atributo.es_pk ? 'PK' : '' }}</td>
+                <td class="col-acciones">
+                  @if (!soloLectura()) {
+                    <button type="button" class="boton-icono" (click)="eliminarAtributo(atributo); $event.stopPropagation()">
+                      🗑
+                    </button>
+                  }
+                </td>
+              </tr>
             }
-          </li>
-        }
-      }
-    </ul>
-  </section>
-
-  <section class="bloque">
-    <div class="bloque-header">
-      <h4>Métodos</h4>
-      @if (!soloLectura() && editandoMetodoId() === null) {
-        <button type="button" class="boton-texto" (click)="iniciarNuevoMetodo()">+ Agregar</button>
-      }
-    </div>
-
-    @if (editandoMetodoId() !== null) {
-      <form class="form-miembro" [formGroup]="formMetodo" (ngSubmit)="guardarMetodo()">
-        <input type="text" formControlName="nombre" placeholder="nombre" autocomplete="off" />
-        <input type="text" formControlName="tipo_retorno" placeholder="retorno (vacío = void)" autocomplete="off" />
-        <select formControlName="visibilidad">
-          <option value="PUBLICO">+ público</option>
-          <option value="PRIVADO">- privado</option>
-          <option value="PROTEGIDO"># protegido</option>
-          <option value="PAQUETE">~ paquete</option>
-        </select>
-
-        <div class="parametros">
-          <span class="parametros-titulo">Parámetros</span>
-          @for (param of parametrosMetodo(); track $index) {
-            <div class="parametro-fila">
-              <input
-                type="text"
-                placeholder="nombre"
-                [value]="param.nombre"
-                (input)="actualizarParametro($index, 'nombre', $any($event.target).value)"
-              />
-              <input
-                type="text"
-                placeholder="tipo"
-                [value]="param.tipo"
-                (input)="actualizarParametro($index, 'tipo', $any($event.target).value)"
-              />
-              <button type="button" class="boton-icono" (click)="quitarParametro($index)">×</button>
-            </div>
           }
-          <button type="button" class="boton-texto" (click)="agregarParametro()">+ Parámetro</button>
-        </div>
 
-        <div class="acciones-miembro">
-          <button type="button" class="boton-texto" (click)="cancelarMetodo()">Cancelar</button>
-          <button type="submit" class="boton-primario-sm">Guardar</button>
-        </div>
-      </form>
+          @if (!soloLectura()) {
+            @if (editandoAtributoId() === 'nuevo') {
+              <tr class="fila-edicion">
+                <td colspan="5">
+                  <form class="form-fila" [formGroup]="formAtributo" (ngSubmit)="guardarAtributo()">
+                    <input type="text" formControlName="nombre" placeholder="nombre" autocomplete="off" autofocus />
+                    <input type="text" formControlName="tipo" placeholder="tipo (opcional)" autocomplete="off" />
+                    <select formControlName="visibilidad">
+                      <option value="PUBLICO">+ público</option>
+                      <option value="PRIVADO">- privado</option>
+                      <option value="PROTEGIDO"># protegido</option>
+                      <option value="PAQUETE">~ paquete</option>
+                    </select>
+                    <label class="check"><input type="checkbox" formControlName="es_pk" /> PK</label>
+                    <button type="submit" class="boton-primario-sm">Agregar</button>
+                    <button type="button" class="boton-texto" (click)="cancelarAtributo()">Cancelar</button>
+                  </form>
+                </td>
+              </tr>
+            } @else {
+              <tr class="fila-nueva" (click)="iniciarNuevoAtributo()">
+                <td colspan="5">+ Nuevo atributo...</td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
     }
 
-    <ul class="lista-miembros">
-      @for (metodo of metodosOrdenados(); track metodo.id) {
-        @if (editandoMetodoId() !== metodo.id) {
-          <li class="miembro">
-            <span class="miembro-texto">
-              {{ simboloVisibilidad(metodo.visibilidad) }} {{ metodo.nombre }}({{
-                parametrosTexto(metodo)
-              }}): {{ metodo.tipo_retorno || 'void' }}
-            </span>
-            @if (!soloLectura()) {
-              <span class="miembro-acciones">
-                <button type="button" class="boton-icono" (click)="iniciarEdicionMetodo(metodo)">✎</button>
-                <button type="button" class="boton-icono" (click)="eliminarMetodo(metodo)">🗑</button>
-              </span>
+    @if (pestanaActiva() === 'metodos') {
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Parámetros</th>
+            <th>Retorno</th>
+            <th>Vis.</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (metodo of metodosOrdenados(); track metodo.id) {
+            @if (editandoMetodoId() === metodo.id) {
+              <tr class="fila-edicion">
+                <td colspan="5">
+                  <ng-container [ngTemplateOutlet]="formMetodoTpl" />
+                </td>
+              </tr>
+            } @else {
+              <tr (click)="!soloLectura() && iniciarEdicionMetodo(metodo)">
+                <td>{{ simboloVisibilidad(metodo.visibilidad) }} {{ metodo.nombre }}</td>
+                <td>{{ parametrosTexto(metodo) || '—' }}</td>
+                <td>{{ metodo.tipo_retorno || 'void' }}</td>
+                <td>{{ metodo.visibilidad }}</td>
+                <td class="col-acciones">
+                  @if (!soloLectura()) {
+                    <button type="button" class="boton-icono" (click)="eliminarMetodo(metodo); $event.stopPropagation()">
+                      🗑
+                    </button>
+                  }
+                </td>
+              </tr>
             }
-          </li>
-        }
-      }
-    </ul>
-  </section>
+          }
 
-  @if (!soloLectura()) {
-    <button type="button" class="boton-peligro-sm" (click)="eliminarClase()">Eliminar clase</button>
-  }
+          @if (!soloLectura()) {
+            @if (editandoMetodoId() === 'nuevo') {
+              <tr class="fila-edicion">
+                <td colspan="5">
+                  <ng-container [ngTemplateOutlet]="formMetodoTpl" />
+                </td>
+              </tr>
+            } @else {
+              <tr class="fila-nueva" (click)="iniciarNuevoMetodo()">
+                <td colspan="5">+ Nuevo método...</td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+
+      <ng-template #formMetodoTpl>
+        <form class="form-fila form-fila-metodo" [formGroup]="formMetodo" (ngSubmit)="guardarMetodo()">
+          <div class="fila-principal">
+            <input type="text" formControlName="nombre" placeholder="nombre" autocomplete="off" autofocus />
+            <input
+              type="text"
+              formControlName="tipo_retorno"
+              placeholder="retorno (vacío = void)"
+              autocomplete="off"
+            />
+            <select formControlName="visibilidad">
+              <option value="PUBLICO">+ público</option>
+              <option value="PRIVADO">- privado</option>
+              <option value="PROTEGIDO"># protegido</option>
+              <option value="PAQUETE">~ paquete</option>
+            </select>
+          </div>
+
+          <div class="parametros">
+            <span class="parametros-titulo">Parámetros</span>
+            @for (param of parametrosMetodo(); track $index) {
+              <div class="parametro-fila">
+                <input
+                  type="text"
+                  placeholder="nombre"
+                  [value]="param.nombre"
+                  (input)="actualizarParametro($index, 'nombre', $any($event.target).value)"
+                />
+                <input
+                  type="text"
+                  placeholder="tipo"
+                  [value]="param.tipo"
+                  (input)="actualizarParametro($index, 'tipo', $any($event.target).value)"
+                />
+                <button type="button" class="boton-icono" (click)="quitarParametro($index)">×</button>
+              </div>
+            }
+            <button type="button" class="boton-texto" (click)="agregarParametro()">+ Parámetro</button>
+          </div>
+
+          <div class="acciones-form">
+            <button type="button" class="boton-texto" (click)="cancelarMetodo()">Cancelar</button>
+            <button type="submit" class="boton-primario-sm">Guardar</button>
+          </div>
+        </form>
+      </ng-template>
+    }
+  </div>
 </div>
 
 <app-modal [abierto]="mostrarConfirmarEliminar()" ancho="380px" (cerrado)="cancelarEliminarClase()">
