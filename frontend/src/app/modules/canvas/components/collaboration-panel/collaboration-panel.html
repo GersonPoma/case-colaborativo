@@ -1,0 +1,32 @@
+@if (minimizado()) {
+  <button type="button" class="franja-minimizada" (click)="alternarMinimizado()">
+    <span class="icono">💬</span>
+    @if (noLeidosChat() > 0) {
+      <span class="badge">{{ noLeidosChat() }}</span>
+    }
+  </button>
+} @else {
+  <div class="panel-colaboracion">
+    <nav class="pestanas">
+      <button type="button" class="pestana" [class.activa]="pestanaActiva() === 'chat'" (click)="seleccionarPestana('chat')">
+        Chat
+        @if (noLeidosChat() > 0 && pestanaActiva() !== 'chat') {
+          <span class="badge-mini">{{ noLeidosChat() }}</span>
+        }
+      </button>
+      <button type="button" class="pestana" [class.activa]="pestanaActiva() === 'ia'" (click)="seleccionarPestana('ia')">
+        IA
+      </button>
+      <span class="espaciador"></span>
+      <button type="button" class="boton-minimizar" (click)="alternarMinimizado()" title="Minimizar">›</button>
+    </nav>
+
+    <div class="contenido-pestana">
+      @if (pestanaActiva() === 'chat') {
+        <app-chat-panel [proyectoId]="proyectoId()" />
+      } @else {
+        <p class="proximamente">El panel de IA todavía no está listo.</p>
+      }
+    </div>
+  </div>
+}
