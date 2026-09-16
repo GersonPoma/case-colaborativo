@@ -15,10 +15,12 @@ from app.modules.workspace.schema import (
     CrearProyecto,
     EnviarMensaje,
     HistorialVersionesResumen,
+    InvitacionRespuesta,
     InvitarColaborador,
     MensajeChatRespuesta,
     ProyectoConRol,
     ProyectoRespuesta,
+    ResponderInvitacion,
 )
 from app.modules.workspace.service import (
     ColaboradorService,
@@ -59,6 +61,16 @@ async def listar_proyectos_colaboraciones(
     service: ColaboradorService = Depends(get_colaborador_service),
 ):
     items, total = await service.listar_colaboraciones(usuario.id, params)
+    return construir_pagina(items, total, params)
+
+
+@router.get("/invitaciones", response_model=Pagina[InvitacionRespuesta])
+async def listar_invitaciones_pendientes(
+    params: ParametrosPaginacion = Depends(),
+    usuario: Usuario = Depends(get_current_user),
+    service: ColaboradorService = Depends(get_colaborador_service),
+):
+    items, total = await service.listar_invitaciones_pendientes(usuario.id, params)
     return construir_pagina(items, total, params)
 
 
@@ -108,6 +120,16 @@ async def invitar_colaborador(
     service: ColaboradorService = Depends(get_colaborador_service),
 ):
     return await service.invitar(proyecto_id, usuario.id, datos)
+
+
+@router.post("/{proyecto_id}/invitacion/responder", response_model=ColaboradorRespuesta)
+async def responder_invitacion(
+    proyecto_id: int,
+    datos: ResponderInvitacion,
+    usuario: Usuario = Depends(get_current_user),
+    service: ColaboradorService = Depends(get_colaborador_service),
+):
+    return await service.responder_invitacion(proyecto_id, usuario.id, datos)
 
 
 @router.patch("/{proyecto_id}/colaboradores/{id_usuario}", response_model=ColaboradorRespuesta)
