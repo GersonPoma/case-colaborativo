@@ -9,10 +9,12 @@ import {
   CrearProyecto,
   EnviarMensaje,
   InvitarColaborador,
+  ResponderInvitacion,
 } from '../models/proyecto-api.model';
 import {
   Colaborador,
   HistorialVersionResumen,
+  InvitacionPendiente,
   MensajeChat,
   Proyecto,
   ProyectoConRol,
@@ -74,6 +76,19 @@ export class WorkspaceApiService {
 
   quitarColaborador(id: number, idUsuario: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}/colaboradores/${idUsuario}`);
+  }
+
+  listarInvitacionesPendientes(
+    pagina = 1,
+    tamano = 10,
+  ): Observable<Pagina<InvitacionPendiente>> {
+    return this.http.get<Pagina<InvitacionPendiente>>(`${this.baseUrl}/invitaciones`, {
+      params: this.paginar(pagina, tamano),
+    });
+  }
+
+  responderInvitacion(id: number, datos: ResponderInvitacion): Observable<Colaborador> {
+    return this.http.post<Colaborador>(`${this.baseUrl}/${id}/invitacion/responder`, datos);
   }
 
   listarHistorial(
