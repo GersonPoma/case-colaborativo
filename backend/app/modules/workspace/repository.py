@@ -54,7 +54,10 @@ class ColaboradorRepository:
         statement = (
             select(Colaborador)
             .options(selectinload(Colaborador.usuario))
-            .where(Colaborador.id_proyecto == id_proyecto)
+            .where(
+                Colaborador.id_proyecto == id_proyecto,
+                Colaborador.estado == EstadoColaborador.ACEPTADO,
+            )
         )
         return await paginar(self.db, statement, params)
 
