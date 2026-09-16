@@ -38,6 +38,42 @@
       }
     </section>
 
+    @if (invitaciones().length > 0) {
+      <section>
+        <h2>Invitaciones pendientes</h2>
+        <ul class="lista-invitaciones">
+          @for (invitacion of invitaciones(); track invitacion.id_proyecto) {
+            <li>
+              <div class="info-invitacion">
+                <span class="nombre-proyecto">{{ invitacion.proyecto.nombre }}</span>
+                <span class="etiqueta" [class.editor]="invitacion.rol === 'EDITOR'">
+                  {{ invitacion.rol }}
+                </span>
+              </div>
+              <div class="acciones-invitacion">
+                <button
+                  type="button"
+                  class="boton-primario"
+                  [disabled]="procesandoInvitacionId() === invitacion.id_proyecto"
+                  (click)="responderInvitacion(invitacion, true)"
+                >
+                  Aceptar
+                </button>
+                <button
+                  type="button"
+                  class="boton-texto boton-peligro"
+                  [disabled]="procesandoInvitacionId() === invitacion.id_proyecto"
+                  (click)="responderInvitacion(invitacion, false)"
+                >
+                  Rechazar
+                </button>
+              </div>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+
     <section>
       <h2>Compartidos conmigo</h2>
       @if (colaboraciones().length === 0) {

@@ -7,7 +7,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { obtenerMensajeError } from '../../../../core/utils/http-error.util';
 import { Modal } from '../../../../shared/components/modal/modal';
 import { Paginador } from '../../../../shared/components/paginador/paginador';
-import { Proyecto, ProyectoConRol } from '../../models/proyecto.model';
+import { InvitacionPendiente, Proyecto, ProyectoConRol } from '../../models/proyecto.model';
 import { WorkspaceApiService } from '../../services/workspace-api.service';
 
 @Component({
@@ -29,6 +29,9 @@ export class ProjectList {
   readonly colaboraciones = signal<ProyectoConRol[]>([]);
   readonly paginaColaboraciones = signal(1);
   readonly totalPaginasColaboraciones = signal(1);
+
+  readonly invitaciones = signal<InvitacionPendiente[]>([]);
+  readonly procesandoInvitacionId = signal<number | null>(null);
 
   readonly cargando = signal(true);
   readonly error = signal<string | null>(null);
@@ -52,17 +55,45 @@ export class ProjectList {
     forkJoin({
       propios: this.workspaceApi.listarPropios(this.paginaPropios()),
       colaboraciones: this.workspaceApi.listarColaboraciones(this.paginaColaboraciones()),
+      invitaciones: this.workspaceApi.listarInvitacionesPendientes(),
     }).subscribe({
-      next: ({ propios, colaboraciones }) => {
+      next: ({ propios, colaboraciones, invitaciones }) => {
         this.propios.set(propios.items);
         this.totalPaginasPropios.set(propios.total_paginas);
         this.colaboraciones.set(colaboraciones.items);
         this.totalPaginasColaboraciones.set(colaboraciones.total_paginas);
+        this.invitaciones.set(invitaciones.items);
         this.cargando.set(false);
       },
       error: (err: unknown) => {
         this.error.set(obtenerMensajeError(err));
         this.cargando.set(false);
+      },
+    });
+  }
+
+  responderInvitacion(invitacion: InvitacionPendiente, aceptar: boolean): void {
+    this.procesandoInvitacionId.set(invitacion.id_proyecto);
+    this.error.set(null);
+
+    this.workspaceApi.responderInvitacion(invitacion.id_proyecto, { aceptar }).subscribe({
+      next: () => {
+        this.invitaciones.update((lista) =>
+          lista.filter((i) => i.id_proyecto !== invitacion.id_proyecto),
+        );
+        this.procesandoInvitacionId.set(null);
+        if (aceptar) {
+          this.workspaceApi.listarColaboraciones(this.paginaColaboraciones()).subscribe({
+            next: (respuesta) => {
+              this.colaboraciones.set(respuesta.items);
+              this.totalPaginasColaboraciones.set(respuesta.total_paginas);
+            },
+          });
+        }
+      },
+      error: (err: unknown) => {
+        this.procesandoInvitacionId.set(null);
+        this.error.set(obtenerMensajeError(err));
       },
     });
   }
