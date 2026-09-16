@@ -12,6 +12,7 @@ import {
   TipoRelacion,
   Visibilidad,
 } from '../../../core/models/lienzo.model';
+import { MensajeChat } from '../../workspace/models/proyecto.model';
 
 export type AccionCanvas =
   | 'CREAR_CLASE'
@@ -74,6 +75,7 @@ export class CanvasService implements OnDestroy {
   readonly conectado = signal(false);
   readonly error = signal<string | null>(null);
   readonly puedeDeshacer = signal(false);
+  readonly ultimoMensajeChat = signal<MensajeChat | null>(null);
 
   inicializar(estado: EstadoLienzo): void {
     this.lienzo.set(estado);
@@ -313,6 +315,8 @@ export class CanvasService implements OnDestroy {
   }
 
   private procesarMensaje(mensaje: {
+    tipo?: string;
+    mensaje?: MensajeChat;
     accion?: AccionCanvas;
     datos?: any;
     usuario_id?: number;
@@ -320,6 +324,10 @@ export class CanvasService implements OnDestroy {
   }): void {
     if (mensaje.error) {
       this.error.set(mensaje.error);
+      return;
+    }
+    if (mensaje.tipo === 'MENSAJE_CHAT' && mensaje.mensaje) {
+      this.ultimoMensajeChat.set(mensaje.mensaje);
       return;
     }
     if (mensaje.accion) {

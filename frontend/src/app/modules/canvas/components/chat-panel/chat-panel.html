@@ -1,1 +1,32 @@
-<p>chat-panel works!</p>
+<div class="chat-panel">
+  <h4>Chat del proyecto</h4>
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  <div class="lista" #lista (scroll)="alScrollear()">
+    @if (cargando()) {
+      <p class="estado">Cargando mensajes...</p>
+    } @else {
+      @if (cargandoMas()) {
+        <p class="estado">Cargando mensajes anteriores...</p>
+      }
+      @if (mensajes().length === 0) {
+        <p class="vacio">Todavía no hay mensajes. ¡Escribí el primero!</p>
+      }
+      @for (mensaje of mensajes(); track mensaje.id) {
+        <div class="mensaje" [class.propio]="mensaje.usuario.id === miUsuarioId()">
+          <span class="autor">{{ mensaje.usuario.username }}</span>
+          <p class="contenido">{{ mensaje.contenido }}</p>
+          <span class="fecha">{{ mensaje.fecha_envio | date: 'dd/MM HH:mm' }}</span>
+        </div>
+      }
+    }
+  </div>
+
+  <form class="form-enviar" [formGroup]="formulario" (ngSubmit)="enviar()">
+    <input type="text" formControlName="contenido" placeholder="Escribí un mensaje..." autocomplete="off" />
+    <button type="submit" [disabled]="enviando()">Enviar</button>
+  </form>
+</div>
