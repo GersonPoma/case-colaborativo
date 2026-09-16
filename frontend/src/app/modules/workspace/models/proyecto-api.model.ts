@@ -14,6 +14,10 @@ export interface CambiarRolColaborador {
   rol: RolColaborador;
 }
 
+export interface ResponderInvitacion {
+  aceptar: boolean;
+}
+
 export interface EnviarMensaje {
   contenido: string;
 }

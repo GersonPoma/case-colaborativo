@@ -1,4 +1,5 @@
 export type RolColaborador = 'LECTOR' | 'EDITOR';
+export type EstadoColaborador = 'PENDIENTE' | 'ACEPTADO' | 'RECHAZADO';
 
 export interface Proyecto {
   id: number;
@@ -21,6 +22,14 @@ export interface UsuarioResumen {
 
 export interface Colaborador {
   usuario: UsuarioResumen;
+  rol: RolColaborador;
+  estado: EstadoColaborador;
+  unido_en: string;
+}
+
+export interface InvitacionPendiente {
+  id_proyecto: number;
+  proyecto: Proyecto;
   rol: RolColaborador;
   unido_en: string;
 }
