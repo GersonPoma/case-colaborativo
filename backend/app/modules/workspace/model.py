@@ -14,6 +14,12 @@ class RolColaborador(str, enum.Enum):
     EDITOR = "EDITOR"
 
 
+class EstadoColaborador(str, enum.Enum):
+    PENDIENTE = "PENDIENTE"
+    ACEPTADO = "ACEPTADO"
+    RECHAZADO = "RECHAZADO"
+
+
 class Proyecto(BaseAuditable, Base):
     __tablename__ = "proyectos"
 
@@ -35,6 +41,11 @@ class Colaborador(Base):
     id_proyecto = Column(Integer, ForeignKey("proyectos.id"), primary_key=True)
     id_usuario = Column(Integer, ForeignKey("usuarios.id"), primary_key=True)
     rol = Column(Enum(RolColaborador, name="rol_colaborador"), nullable=False)
+    estado = Column(
+        Enum(EstadoColaborador, name="estado_colaborador"),
+        nullable=False,
+        default=EstadoColaborador.PENDIENTE,
+    )
     unido_en = Column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False
     )
