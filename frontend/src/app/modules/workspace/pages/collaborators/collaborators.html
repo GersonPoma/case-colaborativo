@@ -49,7 +49,17 @@
       <ul class="lista-colaboradores">
         @for (colaborador of colaboradores(); track colaborador.usuario.id) {
           <li>
-            <span class="username">{{ colaborador.usuario.username }}</span>
+            <div class="info-colaborador">
+              <span class="username">{{ colaborador.usuario.username }}</span>
+              @if (colaborador.estado !== 'ACEPTADO') {
+                <span
+                  class="etiqueta-estado"
+                  [class.rechazado]="colaborador.estado === 'RECHAZADO'"
+                >
+                  {{ colaborador.estado === 'PENDIENTE' ? 'Invitación pendiente' : 'Rechazada' }}
+                </span>
+              }
+            </div>
 
             @if (esDueno()) {
               <div class="acciones-colaborador">
