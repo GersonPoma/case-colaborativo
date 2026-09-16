@@ -8,7 +8,7 @@ export const routes: Routes = [
   },
   {
     path: 'editor',
-    loadComponent: () => import('./modules/canvas/pages/editor/editor').then((m) => m.Editor),
+    redirectTo: 'registro',
   },
   {
     path: 'editor/:id',
