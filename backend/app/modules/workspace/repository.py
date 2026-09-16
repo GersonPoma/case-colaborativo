@@ -3,7 +3,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.core.pagination import ParametrosPaginacion, paginar
-from app.modules.workspace.model import Colaborador, HistorialVersiones, MensajeChat, Proyecto
+from app.modules.workspace.model import (
+    Colaborador,
+    EstadoColaborador,
+    HistorialVersiones,
+    MensajeChat,
+    Proyecto,
+)
 
 
 class ProyectoRepository:
@@ -58,7 +64,24 @@ class ColaboradorRepository:
         statement = (
             select(Colaborador)
             .options(selectinload(Colaborador.proyecto))
-            .where(Colaborador.id_usuario == id_usuario)
+            .where(
+                Colaborador.id_usuario == id_usuario,
+                Colaborador.estado == EstadoColaborador.ACEPTADO,
+            )
+        )
+        return await paginar(self.db, statement, params)
+
+    async def list_pendientes_por_usuario(
+        self, id_usuario: int, params: ParametrosPaginacion
+    ) -> tuple[list[Colaborador], int]:
+        statement = (
+            select(Colaborador)
+            .options(selectinload(Colaborador.proyecto))
+            .where(
+                Colaborador.id_usuario == id_usuario,
+                Colaborador.estado == EstadoColaborador.PENDIENTE,
+            )
+            .order_by(Colaborador.unido_en.desc())
         )
         return await paginar(self.db, statement, params)
 
