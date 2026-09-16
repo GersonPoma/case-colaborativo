@@ -104,11 +104,14 @@ class MensajeChatRepository:
     async def list_por_proyecto(
         self, id_proyecto: int, params: ParametrosPaginacion
     ) -> tuple[list[MensajeChat], int]:
+        # orden descendente a propósito: la página 1 son los mensajes más
+        # recientes (para cargar el chat) y las siguientes páginas van hacia
+        # atrás en el tiempo (para el scroll hacia arriba que trae mensajes viejos)
         statement = (
             select(MensajeChat)
             .options(selectinload(MensajeChat.usuario))
             .where(MensajeChat.id_proyecto == id_proyecto)
-            .order_by(MensajeChat.fecha_envio.asc())
+            .order_by(MensajeChat.fecha_envio.desc())
         )
         return await paginar(self.db, statement, params)
 

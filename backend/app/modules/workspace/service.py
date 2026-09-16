@@ -21,7 +21,9 @@ from app.modules.workspace.schema import (
     CrearProyecto,
     EnviarMensaje,
     InvitarColaborador,
+    MensajeChatRespuesta,
 )
+from app.websocket.manager import manager
 
 
 class ProyectoService:
@@ -238,4 +240,8 @@ class MensajeChatService:
         await self.db.commit()
         await self.db.refresh(mensaje)
         mensaje.usuario = await self.usuario_repository.get_by_id(id_usuario)
+
+        payload = MensajeChatRespuesta.model_validate(mensaje).model_dump(mode="json")
+        await manager.difundir(proyecto_id, {"tipo": "MENSAJE_CHAT", "mensaje": payload})
+
         return mensaje
