@@ -26,9 +26,9 @@ interface ConfigRelacion {
 
 export const CONFIG_RELACION_POR_TIPO: Record<TipoRelacion, ConfigRelacion> = {
   ASOCIACION: {},
-  AGREGACION: { origen: { name: 'diamond', width: 14, height: 8, fill: '#fff', stroke: '#555' } },
+  AGREGACION: { destino: { name: 'diamond', width: 14, height: 8, fill: '#fff', stroke: '#555' } },
   COMPOSICION: {
-    origen: { name: 'diamond', width: 14, height: 8, fill: '#555', stroke: '#555' },
+    destino: { name: 'diamond', width: 14, height: 8, fill: '#555', stroke: '#555' },
   },
   HERENCIA: { destino: { name: 'block', width: 14, height: 12, fill: '#fff', stroke: '#555' } },
   REALIZACION: {
