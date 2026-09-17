@@ -676,10 +676,19 @@ def _emitir_extension_ea(
     SubElement(diagrama, "properties", {"name": nombre_proyecto, "type": "Logical"})
     elementos_diagrama = SubElement(diagrama, "elements")
 
+    # EA descarta en silencio la geometria de cualquier elemento con coordenada
+    # negativa (cae a su posicion default en el origen), asi que se desplaza todo
+    # el diagrama para que la esquina mas arriba/izquierda quede en 0,0 -
+    # conserva las posiciones relativas entre clases
+    xs = [int(clase.get("ui", {}).get("x", 0)) for clase in clases.values()]
+    ys = [int(clase.get("ui", {}).get("y", 0)) for clase in clases.values()]
+    desplazo_x = -min(xs) if xs and min(xs) < 0 else 0
+    desplazo_y = -min(ys) if ys and min(ys) < 0 else 0
+
     for indice, (clase_id, clase) in enumerate(clases.items(), start=1):
         ui = clase.get("ui", {})
-        x = int(ui.get("x", 0))
-        y = int(ui.get("y", 0))
+        x = int(ui.get("x", 0)) + desplazo_x
+        y = int(ui.get("y", 0)) + desplazo_y
         ancho = _ancho_estimado(clase)
         alto = _alto_estimado(clase)
         SubElement(
