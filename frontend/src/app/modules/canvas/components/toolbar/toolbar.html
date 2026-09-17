@@ -43,6 +43,16 @@
     {{ exportandoXmiEa() ? 'Exportando...' : 'Exportar a EA' }}
   </button>
 
+  <button
+    type="button"
+    class="boton-herramienta"
+    [disabled]="exportandoImagen()"
+    (click)="exportarImagen.emit()"
+    title="Descarga el diagrama como imagen PNG"
+  >
+    {{ exportandoImagen() ? 'Exportando...' : 'Exportar imagen' }}
+  </button>
+
   @if (puedeEditar()) {
     <span class="autoguardado" title="Cada cambio se guarda solo, al instante">Autoguardado</span>
 

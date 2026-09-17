@@ -148,6 +148,60 @@ export class CanvasBoard implements AfterViewInit, OnDestroy {
     }
   }
 
+  /** Exporta el contenido del lienzo (clases + relaciones) como PNG, recortado a su
+   * contenido real (sin el fondo punteado ni el area en blanco alrededor). */
+  exportarPNG(): Promise<Blob | null> {
+    if (!this.graph) {
+      return Promise.resolve(null);
+    }
+    const bbox = this.graph.getContentBBox();
+    if (bbox.width === 0 || bbox.height === 0) {
+      return Promise.resolve(null);
+    }
+
+    const padding = 20;
+    const escala = 2; // exporta a 2x para que se vea nitido en pantallas de alta densidad
+    const ancho = Math.ceil(bbox.width + padding * 2);
+    const alto = Math.ceil(bbox.height + padding * 2);
+
+    const svgOriginal = this.contenedor().nativeElement.querySelector('svg.x6-graph-svg');
+    if (!svgOriginal) {
+      return Promise.resolve(null);
+    }
+
+    const svgClon = svgOriginal.cloneNode(true) as SVGSVGElement;
+    svgClon.setAttribute('width', String(ancho));
+    svgClon.setAttribute('height', String(alto));
+    svgClon.setAttribute('viewBox', `${bbox.x - padding} ${bbox.y - padding} ${ancho} ${alto}`);
+    // el grupo raiz trae el pan/zoom actual del lienzo interactivo: se quita porque
+    // el viewBox de arriba ya encuadra el contenido en sus propias coordenadas
+    svgClon.querySelector('.x6-graph-svg-viewport')?.removeAttribute('transform');
+
+    const svgTexto = new XMLSerializer().serializeToString(svgClon);
+    const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgTexto)}`;
+
+    return new Promise((resolve) => {
+      const imagen = new Image();
+      imagen.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = ancho * escala;
+        canvas.height = alto * escala;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(null);
+          return;
+        }
+        ctx.scale(escala, escala);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, ancho, alto);
+        ctx.drawImage(imagen, 0, 0, ancho, alto);
+        canvas.toBlob((blob) => resolve(blob), 'image/png');
+      };
+      imagen.onerror = () => resolve(null);
+      imagen.src = svgUrl;
+    });
+  }
+
   private dibujar(lienzo: EstadoLienzo): void {
     if (!this.graph) {
       return;

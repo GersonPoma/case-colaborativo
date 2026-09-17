@@ -64,6 +64,7 @@ export class Editor {
   readonly guardandoVersion = signal(false);
   readonly exportandoXmi = signal(false);
   readonly exportandoXmiEa = signal(false);
+  readonly exportandoImagen = signal(false);
 
   readonly modo = signal<ModoCanvas>('seleccionar');
   readonly claseSeleccionadaId = signal<string | null>(null);
@@ -303,6 +304,37 @@ export class Editor {
       this.interoperabilidadApi.exportarXmiParaEa(this.proyectoId),
       this.exportandoXmiEa,
     );
+  }
+
+  async exportarImagen(): Promise<void> {
+    this.exportandoImagen.set(true);
+    this.error.set(null);
+    try {
+      const blob = await this.board()?.exportarPNG();
+      if (!blob) {
+        this.error.set('No se pudo generar la imagen: el lienzo está vacío.');
+        return;
+      }
+      const nombreArchivo = `${this.slug(this.proyecto()?.nombre ?? 'diagrama')}.png`;
+      const url = URL.createObjectURL(blob);
+      const enlace = document.createElement('a');
+      enlace.href = url;
+      enlace.download = nombreArchivo;
+      enlace.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      this.exportandoImagen.set(false);
+    }
+  }
+
+  private slug(texto: string): string {
+    const normalizado = texto
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '');
+    return normalizado || 'diagrama';
   }
 
   private descargarExportacion(

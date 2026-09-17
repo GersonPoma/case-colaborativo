@@ -12,11 +12,13 @@
       [puedeDeshacer]="canvasService.puedeDeshacer()"
       [exportandoXmi]="exportandoXmi()"
       [exportandoXmiEa]="exportandoXmiEa()"
+      [exportandoImagen]="exportandoImagen()"
       (centrar)="centrar()"
       (guardarVersion)="guardarVersion()"
       (deshacer)="canvasService.deshacer()"
       (exportarXmi)="exportarXmi()"
       (exportarXmiEa)="exportarXmiEa()"
+      (exportarImagen)="exportarImagen()"
     />
 
     @if (error()) {

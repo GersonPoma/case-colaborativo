@@ -15,10 +15,12 @@ export class Toolbar {
   readonly puedeDeshacer = input(false);
   readonly exportandoXmi = input(false);
   readonly exportandoXmiEa = input(false);
+  readonly exportandoImagen = input(false);
 
   readonly guardarVersion = output<void>();
   readonly centrar = output<void>();
   readonly deshacer = output<void>();
   readonly exportarXmi = output<void>();
   readonly exportarXmiEa = output<void>();
+  readonly exportarImagen = output<void>();
 }
