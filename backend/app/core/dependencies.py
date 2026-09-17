@@ -9,7 +9,7 @@ from app.modules.auth.model import Usuario
 from app.modules.auth.repository import UsuarioRepository
 from app.modules.auth.service import PerfilService, UsuarioService
 from app.modules.canvas.service import CanvasService
-from app.modules.interoperability.service import ConfiguracionTranspilacionService
+from app.modules.interoperability.service import ConfiguracionTranspilacionService, XmiExportService
 from app.modules.workspace.service import (
     ColaboradorService,
     HistorialVersionesService,
@@ -54,6 +54,10 @@ async def get_configuracion_transpilacion_service(
     db: AsyncSession = Depends(get_db),
 ) -> ConfiguracionTranspilacionService:
     return ConfiguracionTranspilacionService(db)
+
+
+async def get_xmi_export_service(db: AsyncSession = Depends(get_db)) -> XmiExportService:
+    return XmiExportService(db)
 
 
 async def get_current_user(
