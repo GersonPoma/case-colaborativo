@@ -8,6 +8,7 @@ from app.modules.interoperability.schema import (
     ConfigurarTranspilacion,
     ConfiguracionTranspilacionRespuesta,
 )
+from app.modules.interoperability.xmi_export import construir_xmi
 from app.modules.workspace.service import ProyectoService
 
 JAVA_VERSION_DEFECTO = "17"
@@ -78,3 +79,35 @@ class ConfiguracionTranspilacionService:
             spring_boot_version=config.spring_boot_version,
             base_datos=config.base_datos,
         )
+
+
+class XmiExportService:
+    def __init__(self, db: AsyncSession):
+        self.db = db
+        self.proyecto_service = ProyectoService(db)
+
+    async def exportar(self, proyecto_id: int, id_usuario_solicitante: int) -> tuple[bytes, str]:
+        return await self._exportar(proyecto_id, id_usuario_solicitante, para_ea=False)
+
+    async def exportar_para_ea(
+        self, proyecto_id: int, id_usuario_solicitante: int
+    ) -> tuple[bytes, str]:
+        return await self._exportar(proyecto_id, id_usuario_solicitante, para_ea=True)
+
+    async def _exportar(
+        self, proyecto_id: int, id_usuario_solicitante: int, para_ea: bool
+    ) -> tuple[bytes, str]:
+        proyecto = await self.proyecto_service.obtener(proyecto_id)
+        await self.proyecto_service.verificar_miembro(proyecto, id_usuario_solicitante)
+
+        estado = proyecto.estado_lienzo or {"clases": {}, "relaciones": {}}
+        contenido = construir_xmi(
+            estado.get("clases", {}),
+            estado.get("relaciones", {}),
+            proyecto.nombre,
+            proyecto_id,
+            para_ea=para_ea,
+        )
+        sufijo = "_ea" if para_ea else ""
+        nombre_archivo = f"{_slug(proyecto.nombre)}{sufijo}.xmi"
+        return contenido, nombre_archivo
