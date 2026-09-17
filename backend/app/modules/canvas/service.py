@@ -81,7 +81,7 @@ class CanvasService:
             "nombre": datos.nombre,
             "atributos": {},
             "metodos": {},
-            "ui": {"x": datos.x, "y": datos.y, "ancho": 220, "color": "#e3f2fd"},
+            "ui": {"x": datos.x, "y": datos.y, "ancho": 90, "color": "#e3f2fd"},
         }
         estado["clases"] = {**estado["clases"], clase_id: clase}
 

@@ -42,7 +42,7 @@ class TipoRelacion(str, enum.Enum):
 class UIClase(BaseModel):
     x: float
     y: float
-    ancho: float = 220
+    ancho: float = 90
     color: str = "#e3f2fd"
 
 

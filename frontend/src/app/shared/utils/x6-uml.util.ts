@@ -53,8 +53,24 @@ interface ClaseDibujable {
   attrs: Record<string, object>;
 }
 
+/** Mismo ancho por defecto que usa Enterprise Architect para una clase nueva vacía. */
+const ANCHO_MINIMO_CLASE = 90;
+const PADDING_HORIZONTAL_CLASE = 20;
+
+let ctxMedidaTexto: CanvasRenderingContext2D | null | undefined;
+
+function medirAnchoTexto(texto: string, fontWeight: number, fontSize: number): number {
+  if (ctxMedidaTexto === undefined) {
+    ctxMedidaTexto = document.createElement('canvas').getContext('2d');
+  }
+  if (!ctxMedidaTexto) {
+    return texto.length * fontSize * 0.6; // estimación de reserva si el canvas 2D no está disponible
+  }
+  ctxMedidaTexto.font = `${fontWeight} ${fontSize}px sans-serif`;
+  return ctxMedidaTexto.measureText(texto).width;
+}
+
 function construirClaseDibujable(clase: Clase): ClaseDibujable {
-  const ancho = clase.ui.ancho || 200;
   const altoLinea = 15;
   const padVertical = 8; // 4 arriba + 4 abajo
 
@@ -73,6 +89,14 @@ function construirClaseDibujable(clase: Clase): ClaseDibujable {
       const retorno = m.tipo_retorno || 'void';
       return `${simbolo} ${m.nombre}(${parametros}): ${retorno}`;
     });
+
+  const anchoContenido = Math.max(
+    medirAnchoTexto(clase.nombre, 700, 12),
+    ...atributos.map((texto) => medirAnchoTexto(texto, 400, 10)),
+    ...metodos.map((texto) => medirAnchoTexto(texto, 400, 10)),
+    0,
+  );
+  const ancho = Math.max(ANCHO_MINIMO_CLASE, Math.ceil(anchoContenido) + PADDING_HORIZONTAL_CLASE);
 
   const altoTitulo = 26;
   const altoAtributos = Math.max(altoLinea, atributos.length * altoLinea) + padVertical;
