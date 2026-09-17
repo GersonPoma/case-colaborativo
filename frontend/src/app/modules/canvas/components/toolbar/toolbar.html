@@ -23,6 +23,26 @@
     {{ conectado() ? '● En vivo' : '○ Conectando…' }}
   </span>
 
+  <button
+    type="button"
+    class="boton-herramienta"
+    [disabled]="exportandoXmi()"
+    (click)="exportarXmi.emit()"
+    title="Descarga el diagrama en formato XMI estándar para abrirlo en otras herramientas UML"
+  >
+    {{ exportandoXmi() ? 'Exportando...' : 'Exportar XMI' }}
+  </button>
+
+  <button
+    type="button"
+    class="boton-herramienta"
+    [disabled]="exportandoXmiEa()"
+    (click)="exportarXmiEa.emit()"
+    title="Descarga el diagrama en un XMI con el diagrama ya dibujado, pensado para Enterprise Architect"
+  >
+    {{ exportandoXmiEa() ? 'Exportando...' : 'Exportar a EA' }}
+  </button>
+
   @if (puedeEditar()) {
     <span class="autoguardado" title="Cada cambio se guarda solo, al instante">Autoguardado</span>
 

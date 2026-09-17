@@ -13,8 +13,12 @@ export class Toolbar {
   readonly proyectoId = input.required<number>();
   readonly guardandoVersion = input(false);
   readonly puedeDeshacer = input(false);
+  readonly exportandoXmi = input(false);
+  readonly exportandoXmiEa = input(false);
 
   readonly guardarVersion = output<void>();
   readonly centrar = output<void>();
   readonly deshacer = output<void>();
+  readonly exportarXmi = output<void>();
+  readonly exportarXmiEa = output<void>();
 }
