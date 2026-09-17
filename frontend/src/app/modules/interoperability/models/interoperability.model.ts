@@ -1,3 +1,5 @@
+import { Clase, Relacion } from '../../../core/models/lienzo.model';
+
 export type BaseDatosDestino = 'POSTGRESQL' | 'MYSQL' | 'H2';
 
 export interface ConfiguracionTranspilacion {
@@ -7,4 +9,9 @@ export interface ConfiguracionTranspilacion {
   java_version: string;
   spring_boot_version: string;
   base_datos: BaseDatosDestino;
+}
+
+export interface ImportarXmiResultado {
+  clases: Record<string, Clase>;
+  relaciones: Record<string, Relacion>;
 }
