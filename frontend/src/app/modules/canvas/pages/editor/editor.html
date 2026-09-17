@@ -10,9 +10,13 @@
       [proyectoId]="proyectoId"
       [guardandoVersion]="guardandoVersion()"
       [puedeDeshacer]="canvasService.puedeDeshacer()"
+      [exportandoXmi]="exportandoXmi()"
+      [exportandoXmiEa]="exportandoXmiEa()"
       (centrar)="centrar()"
       (guardarVersion)="guardarVersion()"
       (deshacer)="canvasService.deshacer()"
+      (exportarXmi)="exportarXmi()"
+      (exportarXmiEa)="exportarXmiEa()"
     />
 
     @if (error()) {

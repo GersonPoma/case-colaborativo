@@ -1,9 +1,19 @@
-import { Component, HostListener, computed, inject, signal, viewChild } from '@angular/core';
+import { HttpResponse } from '@angular/common/http';
+import {
+  Component,
+  HostListener,
+  WritableSignal,
+  computed,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { Observable, forkJoin } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
 import { Clase, TipoRelacion } from '../../../../core/models/lienzo.model';
 import { obtenerMensajeError } from '../../../../core/utils/http-error.util';
+import { InteroperabilidadApiService } from '../../../interoperability/services/interoperability-api.service';
 import { Colaborador, Proyecto, RolColaborador } from '../../../workspace/models/proyecto.model';
 import { WorkspaceApiService } from '../../../workspace/services/workspace-api.service';
 import { CanvasBoard, ModoCanvas } from '../../components/canvas-board/canvas-board';
@@ -40,6 +50,7 @@ export class Editor {
   private readonly authService = inject(AuthService);
   private readonly workspaceApi = inject(WorkspaceApiService);
   private readonly canvasApi = inject(CanvasApiService);
+  private readonly interoperabilidadApi = inject(InteroperabilidadApiService);
   protected readonly canvasService = inject(CanvasService);
 
   private readonly board = viewChild<CanvasBoard>(CanvasBoard);
@@ -51,6 +62,8 @@ export class Editor {
   readonly cargando = signal(true);
   readonly error = signal<string | null>(null);
   readonly guardandoVersion = signal(false);
+  readonly exportandoXmi = signal(false);
+  readonly exportandoXmiEa = signal(false);
 
   readonly modo = signal<ModoCanvas>('seleccionar');
   readonly claseSeleccionadaId = signal<string | null>(null);
@@ -276,5 +289,58 @@ export class Editor {
         this.error.set(obtenerMensajeError(err));
       },
     });
+  }
+
+  exportarXmi(): void {
+    this.descargarExportacion(
+      this.interoperabilidadApi.exportarXmi(this.proyectoId),
+      this.exportandoXmi,
+    );
+  }
+
+  exportarXmiEa(): void {
+    this.descargarExportacion(
+      this.interoperabilidadApi.exportarXmiParaEa(this.proyectoId),
+      this.exportandoXmiEa,
+    );
+  }
+
+  private descargarExportacion(
+    peticion: Observable<HttpResponse<Blob>>,
+    cargando: WritableSignal<boolean>,
+  ): void {
+    cargando.set(true);
+    this.error.set(null);
+
+    peticion.subscribe({
+      next: (respuesta) => {
+        cargando.set(false);
+        const contenido = respuesta.body;
+        if (!contenido) {
+          return;
+        }
+        const nombreArchivo =
+          this.extraerNombreArchivo(respuesta.headers.get('content-disposition')) ??
+          'diagrama.xmi';
+        const url = URL.createObjectURL(contenido);
+        const enlace = document.createElement('a');
+        enlace.href = url;
+        enlace.download = nombreArchivo;
+        enlace.click();
+        URL.revokeObjectURL(url);
+      },
+      error: (err: unknown) => {
+        cargando.set(false);
+        this.error.set(obtenerMensajeError(err));
+      },
+    });
+  }
+
+  private extraerNombreArchivo(encabezado: string | null): string | null {
+    if (!encabezado) {
+      return null;
+    }
+    const coincidencia = /filename="([^"]+)"/.exec(encabezado);
+    return coincidencia ? coincidencia[1] : null;
   }
 }
