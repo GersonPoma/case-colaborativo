@@ -525,6 +525,12 @@ def _emitir_extension_ea(
                         "scope": EA_SCOPE.get(atributo["visibilidad"], "Private"),
                     },
                 )
+                # EA lee el tipo mostrado en el compartimento de aqui, no del
+                # ownedAttribute del modelo UML (confirmado con un archivo nativo de EA)
+                props_attr = {"collection": "false", "static": "0", "duplicates": "0", "changeability": "changeable"}
+                if atributo.get("tipo"):
+                    props_attr = {"type": atributo["tipo"], **props_attr}
+                SubElement(attr_el, "properties", props_attr)
                 SubElement(attr_el, "containment", {"position": str(posicion)})
 
         # igual que con los atributos: sin este bloque EA no puede mostrar el
@@ -543,6 +549,22 @@ def _emitir_extension_ea(
                     },
                 )
                 SubElement(op_el, "properties", {"position": str(posicion)})
+                # el tipo de retorno mostrado en el compartimento sale de aca (no del
+                # ownedOperation del modelo UML), igual que el tipo de un atributo
+                SubElement(
+                    op_el,
+                    "type",
+                    {
+                        "type": metodo.get("tipo_retorno") or "void",
+                        "const": "false",
+                        "static": "false",
+                        "isAbstract": "false",
+                        "synchronised": "0",
+                        "concurrency": "Sequential",
+                        "pure": "0",
+                        "isQuery": "false",
+                    },
+                )
                 parametros_el = SubElement(op_el, "parameters")
 
                 parametro_retorno = SubElement(
