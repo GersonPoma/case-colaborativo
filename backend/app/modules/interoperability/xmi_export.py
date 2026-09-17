@@ -422,6 +422,29 @@ def _alto_estimado(clase: dict) -> int:
     return 44 + max(filas, 1) * 16
 
 
+# mismos valores que ANCHO_MINIMO_CLASE/PADDING_HORIZONTAL_CLASE del lienzo
+# (x6-uml.util.ts), para que el ancho en EA se acerque al que se ve ahí
+ANCHO_MINIMO_CLASE = 90
+PADDING_HORIZONTAL_CLASE = 20
+
+
+def _ancho_estimado(clase: dict) -> int:
+    # sin canvas 2D disponible en el backend, se aproxima el ancho de cada texto
+    # con la misma heuristica de respaldo que usa el frontend cuando measureText
+    # no esta disponible (largo del texto * tamano de fuente * 0.6)
+    textos = [(clase.get("nombre", ""), 12)]
+    for atributo in clase.get("atributos", {}).values():
+        sufijo = f": {atributo['tipo']}" if atributo.get("tipo") else ""
+        textos.append((f"X {atributo.get('nombre', '')}{sufijo}", 10))
+    for metodo in clase.get("metodos", {}).values():
+        parametros = ", ".join(f"{p['nombre']}: {p['tipo']}" for p in metodo.get("parametros", []))
+        retorno = metodo.get("tipo_retorno") or "void"
+        textos.append((f"X {metodo.get('nombre', '')}({parametros}): {retorno}", 10))
+
+    ancho_contenido = max((len(texto) * tamano * 0.6 for texto, tamano in textos), default=0)
+    return max(ANCHO_MINIMO_CLASE, int(ancho_contenido) + PADDING_HORIZONTAL_CLASE)
+
+
 def _emitir_extension_ea(
     xmi: Element,
     clases: dict,
@@ -635,7 +658,7 @@ def _emitir_extension_ea(
         ui = clase.get("ui", {})
         x = int(ui.get("x", 0))
         y = int(ui.get("y", 0))
-        ancho = int(ui.get("ancho", 220))
+        ancho = _ancho_estimado(clase)
         alto = _alto_estimado(clase)
         SubElement(
             elementos_diagrama,
