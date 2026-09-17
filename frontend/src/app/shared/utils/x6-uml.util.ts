@@ -98,9 +98,22 @@ function construirClaseDibujable(clase: Clase): ClaseDibujable {
   );
   const ancho = Math.max(ANCHO_MINIMO_CLASE, Math.ceil(anchoContenido) + PADDING_HORIZONTAL_CLASE);
 
+  const hayAtributos = atributos.length > 0;
+  const hayMetodos = metodos.length > 0;
+  const totalmenteVacia = !hayAtributos && !hayMetodos;
+  const altoSeccionVacia = altoLinea + padVertical;
+
   const altoTitulo = 26;
-  const altoAtributos = Math.max(altoLinea, atributos.length * altoLinea) + padVertical;
-  const altoMetodos = Math.max(altoLinea, metodos.length * altoLinea) + padVertical;
+  const altoAtributos = hayAtributos
+    ? atributos.length * altoLinea + padVertical
+    : totalmenteVacia
+      ? altoSeccionVacia
+      : 0;
+  const altoMetodos = hayMetodos
+    ? metodos.length * altoLinea + padVertical
+    : totalmenteVacia
+      ? altoSeccionVacia
+      : 0;
   const yAtributos = altoTitulo;
   const yMetodos = altoTitulo + altoAtributos;
   const alto = altoTitulo + altoAtributos + altoMetodos;
@@ -128,7 +141,14 @@ function construirClaseDibujable(clase: Clase): ClaseDibujable {
         refX: '50%',
         refY: altoTitulo / 2,
       },
-      divisor1: { x1: 0, y1: altoTitulo, x2: ancho, y2: altoTitulo, stroke: '#555', strokeWidth: 1 },
+      divisor1: {
+        x1: 0,
+        y1: altoTitulo,
+        x2: ancho,
+        y2: altoTitulo,
+        stroke: hayAtributos || hayMetodos ? '#555' : 'none',
+        strokeWidth: 1,
+      },
       atributos: {
         text: atributos.join('\n') || ' ',
         fontSize: 10,
@@ -139,7 +159,14 @@ function construirClaseDibujable(clase: Clase): ClaseDibujable {
         refX: 8,
         refY: yAtributos + padVertical / 2,
       },
-      divisor2: { x1: 0, y1: yMetodos, x2: ancho, y2: yMetodos, stroke: '#555', strokeWidth: 1 },
+      divisor2: {
+        x1: 0,
+        y1: yMetodos,
+        x2: ancho,
+        y2: yMetodos,
+        stroke: hayAtributos && hayMetodos ? '#555' : 'none',
+        strokeWidth: 1,
+      },
       metodos: {
         text: metodos.join('\n') || ' ',
         fontSize: 10,
