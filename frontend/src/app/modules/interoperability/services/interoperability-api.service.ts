@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
@@ -24,5 +24,19 @@ export class InteroperabilidadApiService {
       `${this.baseUrl}/${proyectoId}/transpilacion`,
       datos,
     );
+  }
+
+  exportarXmi(proyectoId: number): Observable<HttpResponse<Blob>> {
+    return this.http.get(`${this.baseUrl}/${proyectoId}/exportar/xmi`, {
+      responseType: 'blob',
+      observe: 'response',
+    });
+  }
+
+  exportarXmiParaEa(proyectoId: number): Observable<HttpResponse<Blob>> {
+    return this.http.get(`${this.baseUrl}/${proyectoId}/exportar/xmi-ea`, {
+      responseType: 'blob',
+      observe: 'response',
+    });
   }
 }
