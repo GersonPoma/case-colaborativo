@@ -1,4 +1,6 @@
 import { Graph } from '@antv/x6';
+import type { CellAttrs } from '@antv/x6/lib/registry';
+import type { EdgeLabel } from '@antv/x6/lib/model/edge';
 import { Clase, Relacion, TipoRelacion } from '../../core/models/lienzo.model';
 
 export const SIMBOLO_VISIBILIDAD: Record<string, string> = {
@@ -152,10 +154,8 @@ export function agregarNodoClase(graph: Graph, clase: Clase, interactivo: boolea
   });
 }
 
-function agregarEdgeRelacion(graph: Graph, relacion: Relacion, interactivo: boolean): void {
-  const config = CONFIG_RELACION_POR_TIPO[relacion.tipo] ?? {};
-
-  const labels: object[] = [];
+function construirLabelsRelacion(relacion: Relacion): EdgeLabel[] {
+  const labels: EdgeLabel[] = [];
   if (relacion.cardinalidad_origen) {
     labels.push({
       attrs: { text: { text: relacion.cardinalidad_origen, fontSize: 9, fill: '#555' } },
@@ -180,21 +180,29 @@ function agregarEdgeRelacion(graph: Graph, relacion: Relacion, interactivo: bool
       position: { distance: 0.88 },
     });
   }
+  return labels;
+}
 
+function construirAttrsLineaRelacion(relacion: Relacion): CellAttrs {
+  const config = CONFIG_RELACION_POR_TIPO[relacion.tipo] ?? {};
+  return {
+    line: {
+      stroke: '#555',
+      strokeWidth: 1.5,
+      strokeDasharray: config.punteada ? '5 3' : undefined,
+      sourceMarker: config.origen ?? null,
+      targetMarker: config.destino ?? null,
+    },
+  } as CellAttrs;
+}
+
+function agregarEdgeRelacion(graph: Graph, relacion: Relacion, interactivo: boolean): void {
   graph.addEdge({
     id: relacion.id,
     source: relacion.origen_id,
     target: relacion.destino_id,
-    attrs: {
-      line: {
-        stroke: '#555',
-        strokeWidth: 1.5,
-        strokeDasharray: config.punteada ? '5 3' : undefined,
-        sourceMarker: config.origen ?? null,
-        targetMarker: config.destino ?? null,
-      },
-    },
-    labels,
+    attrs: construirAttrsLineaRelacion(relacion),
+    labels: construirLabelsRelacion(relacion),
     interacting: interactivo ? undefined : false,
   });
 
@@ -316,15 +324,29 @@ export function sincronizarRelaciones(
     }
 
     const bordeExistente = graph.getCellById(relacion.id);
-    if (bordeExistente) {
-      graph.removeCell(bordeExistente);
-    }
-    const conectorExistente = graph.getCellById(conectorAsociadaId(relacion.id));
-    if (conectorExistente) {
-      graph.removeCell(conectorExistente);
-    }
+    const esEdgeExistente = bordeExistente !== null && bordeExistente.isEdge();
+    const mismaTopologia =
+      esEdgeExistente &&
+      String(bordeExistente.getSourceCellId()) === relacion.origen_id &&
+      String(bordeExistente.getTargetCellId()) === relacion.destino_id;
 
-    agregarEdgeRelacion(graph, relacion, interactivo);
+    if (esEdgeExistente && mismaTopologia) {
+      // Actualiza en el lugar en vez de borrar y recrear: recrear la arista con el
+      // mismo id podía dejar el <text> de los labels (cardinalidades) con contenido
+      // mezclado entre el valor anterior y el nuevo (p. ej. "1..1" -> "0" quedaba
+      // como "010"), porque X6 reutiliza la vista de la celda al reinsertarla.
+      bordeExistente.setLabels(construirLabelsRelacion(relacion));
+      bordeExistente.setAttrs(construirAttrsLineaRelacion(relacion));
+    } else {
+      if (bordeExistente) {
+        graph.removeCell(bordeExistente);
+      }
+      const conectorExistente = graph.getCellById(conectorAsociadaId(relacion.id));
+      if (conectorExistente) {
+        graph.removeCell(conectorExistente);
+      }
+      agregarEdgeRelacion(graph, relacion, interactivo);
+    }
     huellas.set(relacion.id, huella);
   }
 }
