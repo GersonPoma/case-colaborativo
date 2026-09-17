@@ -1,16 +1,22 @@
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends, Response, UploadFile
 
 from app.core.dependencies import (
     get_configuracion_transpilacion_service,
     get_current_user,
     get_xmi_export_service,
+    get_xmi_import_service,
 )
 from app.modules.auth.model import Usuario
+from app.modules.canvas.schema import GuardarLienzo
 from app.modules.interoperability.schema import (
     ConfigurarTranspilacion,
     ConfiguracionTranspilacionRespuesta,
 )
-from app.modules.interoperability.service import ConfiguracionTranspilacionService, XmiExportService
+from app.modules.interoperability.service import (
+    ConfiguracionTranspilacionService,
+    XmiExportService,
+    XmiImportService,
+)
 
 router = APIRouter(prefix="/proyectos", tags=["interoperabilidad"])
 
@@ -60,3 +66,14 @@ async def exportar_xmi_para_ea(
         media_type="application/xml",
         headers={"Content-Disposition": f'attachment; filename="{nombre_archivo}"'},
     )
+
+
+@router.post("/{proyecto_id}/importar/xmi", response_model=GuardarLienzo)
+async def importar_xmi(
+    proyecto_id: int,
+    archivo: UploadFile,
+    usuario: Usuario = Depends(get_current_user),
+    service: XmiImportService = Depends(get_xmi_import_service),
+):
+    contenido = await archivo.read()
+    return await service.importar(proyecto_id, usuario.id, contenido)
