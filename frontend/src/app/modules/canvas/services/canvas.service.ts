@@ -28,7 +28,8 @@ export type AccionCanvas =
   | 'EDITAR_RELACION'
   | 'ELIMINAR_RELACION'
   | 'MODIFICAR_UI'
-  | 'ALINEAR_NODOS';
+  | 'ALINEAR_NODOS'
+  | 'REEMPLAZAR_LIENZO';
 
 interface DatosAtributo {
   nombre: string;
@@ -305,6 +306,23 @@ export class CanvasService implements OnDestroy {
     this.enviar('ALINEAR_NODOS', { posiciones });
   }
 
+  /** Reemplaza por completo clases y relaciones (usado al importar un XMI). */
+  reemplazarLienzo(
+    clases: Record<string, Clase>,
+    relaciones: Record<string, Relacion>,
+    opciones: OpcionesEnvio = {},
+  ): void {
+    if (opciones.registrarDeshacer ?? true) {
+      const anterior = this.lienzo();
+      if (anterior) {
+        this.apilarDeshacer(() =>
+          this.reemplazarLienzo(anterior.clases, anterior.relaciones, { registrarDeshacer: false }),
+        );
+      }
+    }
+    this.enviar('REEMPLAZAR_LIENZO', { clases, relaciones });
+  }
+
   private enviar(accion: AccionCanvas, datos: object): void {
     if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
       this.error.set('Todavía no hay conexión en tiempo real con el proyecto');
@@ -497,6 +515,11 @@ export class CanvasService implements OnDestroy {
           }
         }
         this.lienzo.set({ ...estado, clases });
+        break;
+      }
+      case 'REEMPLAZAR_LIENZO': {
+        const nuevoEstado: EstadoLienzo = datos;
+        this.lienzo.set(nuevoEstado);
         break;
       }
     }
