@@ -72,6 +72,12 @@ class CanvasService:
         await self._guardar_estado(proyecto, estado)
         return estado
 
+    async def reemplazar_lienzo(self, proyecto_id: int, datos: GuardarLienzo) -> dict:
+        """Usado al importar un XMI: reemplaza por completo clases y relaciones
+        (mismo comportamiento que guardar_lienzo, con otro nombre de acción de
+        websocket para que el frontend lo pueda distinguir si hace falta)."""
+        return await self.guardar_lienzo(proyecto_id, datos)
+
     async def crear_clase(self, proyecto_id: int, datos: CrearClase) -> dict:
         proyecto, estado = await self._obtener_estado(proyecto_id)
 

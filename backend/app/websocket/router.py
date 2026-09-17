@@ -20,6 +20,7 @@ from app.modules.canvas.schema import (
     EliminarClase,
     EliminarMetodo,
     EliminarRelacion,
+    GuardarLienzo,
     MensajeEntrante,
     MensajeError,
     MensajeSaliente,
@@ -47,6 +48,7 @@ _ESQUEMA_POR_ACCION = {
     AccionCanvas.ELIMINAR_RELACION: EliminarRelacion,
     AccionCanvas.MODIFICAR_UI: ModificarUI,
     AccionCanvas.ALINEAR_NODOS: AlinearNodos,
+    AccionCanvas.REEMPLAZAR_LIENZO: GuardarLienzo,
 }
 
 

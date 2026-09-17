@@ -18,6 +18,7 @@ class AccionCanvas(str, enum.Enum):
     ELIMINAR_RELACION = "ELIMINAR_RELACION"
     MODIFICAR_UI = "MODIFICAR_UI"
     ALINEAR_NODOS = "ALINEAR_NODOS"
+    REEMPLAZAR_LIENZO = "REEMPLAZAR_LIENZO"
 
 
 class Visibilidad(str, enum.Enum):
