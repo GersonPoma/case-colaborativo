@@ -13,12 +13,14 @@
       [exportandoXmi]="exportandoXmi()"
       [exportandoXmiEa]="exportandoXmiEa()"
       [exportandoImagen]="exportandoImagen()"
+      [importandoXmi]="importandoXmi()"
       (centrar)="centrar()"
       (guardarVersion)="guardarVersion()"
       (deshacer)="canvasService.deshacer()"
       (exportarXmi)="exportarXmi()"
       (exportarXmiEa)="exportarXmiEa()"
       (exportarImagen)="exportarImagen()"
+      (archivoXmiSeleccionado)="alArchivoXmiSeleccionado($event)"
     />
 
     @if (error()) {
@@ -63,4 +65,19 @@
     [tipoInicial]="tipoRelacionPropuesta()"
     (cerrado)="cerrarRelationForm()"
   />
+
+  <app-modal [abierto]="archivoXmiPendiente() !== null" ancho="420px" (cerrado)="cancelarImportarXmi()">
+    <h2>Importar XMI</h2>
+    <p>
+      Se va a reemplazar <strong>todo el lienzo actual</strong> (clases y relaciones) con el
+      contenido de "<strong>{{ archivoXmiPendiente()?.name }}</strong>". Esta acción no se puede
+      deshacer una vez que otros colaboradores vean el cambio.
+    </p>
+    <div class="acciones-form">
+      <button type="button" class="boton-secundario" (click)="cancelarImportarXmi()">Cancelar</button>
+      <button type="button" class="boton-peligro" [disabled]="importandoXmi()" (click)="confirmarImportarXmi()">
+        {{ importandoXmi() ? 'Importando...' : 'Reemplazar lienzo' }}
+      </button>
+    </div>
+  </app-modal>
 }

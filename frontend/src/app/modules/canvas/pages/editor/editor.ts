@@ -13,6 +13,7 @@ import { Observable, forkJoin } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
 import { Clase, TipoRelacion } from '../../../../core/models/lienzo.model';
 import { obtenerMensajeError } from '../../../../core/utils/http-error.util';
+import { Modal } from '../../../../shared/components/modal/modal';
 import { InteroperabilidadApiService } from '../../../interoperability/services/interoperability-api.service';
 import { Colaborador, Proyecto, RolColaborador } from '../../../workspace/models/proyecto.model';
 import { WorkspaceApiService } from '../../../workspace/services/workspace-api.service';
@@ -40,7 +41,7 @@ function esTipoRelacion(modo: ModoCanvas): modo is TipoRelacion {
 
 @Component({
   selector: 'app-editor',
-  imports: [Toolbar, Toolbox, CanvasBoard, ClassPanel, RelationForm, CollaborationPanel],
+  imports: [Toolbar, Toolbox, CanvasBoard, ClassPanel, RelationForm, CollaborationPanel, Modal],
   templateUrl: './editor.html',
   styleUrl: './editor.scss',
   providers: [CanvasService],
@@ -65,6 +66,8 @@ export class Editor {
   readonly exportandoXmi = signal(false);
   readonly exportandoXmiEa = signal(false);
   readonly exportandoImagen = signal(false);
+  readonly importandoXmi = signal(false);
+  readonly archivoXmiPendiente = signal<File | null>(null);
 
   readonly modo = signal<ModoCanvas>('seleccionar');
   readonly claseSeleccionadaId = signal<string | null>(null);
@@ -325,6 +328,35 @@ export class Editor {
     } finally {
       this.exportandoImagen.set(false);
     }
+  }
+
+  alArchivoXmiSeleccionado(archivo: File): void {
+    this.archivoXmiPendiente.set(archivo);
+  }
+
+  cancelarImportarXmi(): void {
+    this.archivoXmiPendiente.set(null);
+  }
+
+  confirmarImportarXmi(): void {
+    const archivo = this.archivoXmiPendiente();
+    if (!archivo) {
+      return;
+    }
+    this.importandoXmi.set(true);
+    this.error.set(null);
+    this.interoperabilidadApi.importarXmi(this.proyectoId, archivo).subscribe({
+      next: (resultado) => {
+        this.importandoXmi.set(false);
+        this.archivoXmiPendiente.set(null);
+        this.canvasService.reemplazarLienzo(resultado.clases, resultado.relaciones);
+      },
+      error: (err: unknown) => {
+        this.importandoXmi.set(false);
+        this.archivoXmiPendiente.set(null);
+        this.error.set(obtenerMensajeError(err));
+      },
+    });
   }
 
   private slug(texto: string): string {
