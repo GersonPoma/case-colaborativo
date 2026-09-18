@@ -1,0 +1,10 @@
+package {{ paquete_base }}.dto.response;
+
+{% for import in imports %}
+import {{ import }};
+{% endfor %}
+
+public record {{ nombre_clase }}Response(
+        {{ campos | join(',\n        ') }}
+) {
+}

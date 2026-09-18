@@ -1,0 +1,10 @@
+package {{ paquete_base }}.dto.request;
+
+{% for import in imports %}
+import {{ import }};
+{% endfor %}
+
+public record {{ nombre_clase }}Request(
+        {{ campos | join(',\n        ') }}
+) {
+}

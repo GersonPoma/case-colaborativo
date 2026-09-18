@@ -1,0 +1,38 @@
+package {{ paquete_base }}.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+{% for import in imports %}
+import {{ import }};
+{% endfor %}
+
+@Entity
+@Table(name = "{{ tabla }}")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+{% if tiene_subclases %}
+@Inheritance(strategy = InheritanceType.JOINED)
+{% endif %}
+public class {{ nombre_clase }}{% if extiende %} extends {{ extiende }}{% endif %} {
+
+{% if not extiende %}
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+{% endif %}
+{% for atributo in atributos %}
+    private {{ atributo.tipo_java }} {{ atributo.nombre }};
+{% endfor %}
+{% for relacion in relaciones %}
+    @{{ relacion.anotacion_completa }}
+{% for linea in relacion.lineas_extra %}
+    {{ linea }}
+{% endfor %}
+    private {{ relacion.tipo_campo }} {{ relacion.nombre_campo }};
+{% endfor %}
+}
