@@ -177,11 +177,16 @@ def _construir_contextos(clases: dict, relaciones: dict) -> dict[str, _ContextoC
     for ctx in contextos.values():
         clase = clases[ctx.clase_id]
         atributos = sorted(clase.get("atributos", {}).values(), key=lambda a: a.get("orden", 0))
-        pk = next((a for a in atributos if a.get("es_pk")), None)
-        # solo se respeta el PK marcado en el lienzo si se llama "id": el resto
-        # de las plantillas (service/controller/repository) asumen ese nombre
-        # de campo para los metodos genericos (getId, findById, etc.)
-        if pk and _camel(pk["nombre"]) == "id":
+        # se prioriza el atributo marcado como PK que se llame "id"; si ninguno
+        # esta marcado asi, cualquier atributo llamado "id" igual se trata como
+        # la llave primaria (nadie llama "id" a algo que no lo sea, y evita
+        # duplicar el campo con uno sintetico + renombrar el propio a "id2")
+        pk = next((a for a in atributos if a.get("es_pk") and _camel(a["nombre"]) == "id"), None)
+        if not pk:
+            pk = next((a for a in atributos if _camel(a["nombre"]) == "id"), None)
+        # las plantillas (service/controller/repository) asumen que el campo
+        # de la llave primaria se llama "id"
+        if pk:
             ctx.pk_atributo_id = pk["id"]
             ctx.pk_tipo_java = _tipo_java(pk.get("tipo"))
             ctx.pk_generado = ctx.pk_tipo_java in ("Long", "Integer", "Short")
