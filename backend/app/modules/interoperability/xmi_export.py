@@ -306,14 +306,9 @@ def _emitir_atributos_y_metodos(elemento: Element, clase: dict, tipos: _Registro
                 "visibility": VISIBILIDAD_XMI.get(metodo["visibilidad"], "public"),
             },
         )
-        tipo_retorno_id = tipos.id_de(metodo.get("tipo_retorno"))
-        if tipo_retorno_id:
-            parametro = SubElement(
-                nodo,
-                "ownedParameter",
-                {_qn(NS_XMI, "id"): f"id_{metodo['id']}_return", "direction": "return"},
-            )
-            SubElement(parametro, "type", {_qn(NS_XMI, "idref"): tipo_retorno_id})
+        # el parametro de retorno va AL FINAL (despues de los parametros reales):
+        # asi lo ordena EA en sus propios archivos nativos, y si va primero su
+        # importador se confunde y genera un parametro fantasma "DuplicateParam_1"
         for indice, parametro_datos in enumerate(metodo.get("parametros", [])):
             parametro = SubElement(
                 nodo,
@@ -327,6 +322,18 @@ def _emitir_atributos_y_metodos(elemento: Element, clase: dict, tipos: _Registro
             tipo_param_id = tipos.id_de(parametro_datos.get("tipo"))
             if tipo_param_id:
                 SubElement(parametro, "type", {_qn(NS_XMI, "idref"): tipo_param_id})
+
+        tipo_retorno_id = tipos.id_de(metodo.get("tipo_retorno"))
+        if tipo_retorno_id:
+            # EA solo reconoce el parametro de retorno si trae name="return";
+            # sin ese atributo su importador lo trata como incompleto y genera
+            # un "DuplicateParam_1" fantasma para reemplazarlo
+            parametro = SubElement(
+                nodo,
+                "ownedParameter",
+                {_qn(NS_XMI, "id"): f"id_{metodo['id']}_return", "name": "return", "direction": "return"},
+            )
+            SubElement(parametro, "type", {_qn(NS_XMI, "idref"): tipo_retorno_id})
 
 
 def _emitir_asociacion(
@@ -567,18 +574,13 @@ def _emitir_extension_ea(
                 )
                 parametros_el = SubElement(op_el, "parameters")
 
-                parametro_retorno = SubElement(
-                    parametros_el,
-                    "parameter",
-                    {_qn(NS_XMI, "idref"): f"id_{metodo['id']}_return", "visibility": "public"},
-                )
-                SubElement(
-                    parametro_retorno,
-                    "properties",
-                    {"pos": "0", "type": metodo.get("tipo_retorno") or "void"},
-                )
-
-                for indice_param, parametro in enumerate(metodo.get("parametros", [])):
+                # el retorno compartia "pos=0" con el primer parametro real: esa
+                # colision de posicion hace que el importador de EA invente un
+                # parametro fantasma "DuplicateParam_1". Se evita dandole al
+                # retorno la posicion que sigue a todos los parametros reales
+                # (y poniendolo al final, igual que a nivel de modelo UML)
+                lista_parametros = metodo.get("parametros", [])
+                for indice_param, parametro in enumerate(lista_parametros):
                     parametro_el = SubElement(
                         parametros_el,
                         "parameter",
@@ -592,6 +594,17 @@ def _emitir_extension_ea(
                         "properties",
                         {"pos": str(indice_param), "type": parametro.get("tipo") or ""},
                     )
+
+                parametro_retorno = SubElement(
+                    parametros_el,
+                    "parameter",
+                    {_qn(NS_XMI, "idref"): f"id_{metodo['id']}_return", "visibility": "public"},
+                )
+                SubElement(
+                    parametro_retorno,
+                    "properties",
+                    {"pos": str(len(lista_parametros)), "type": metodo.get("tipo_retorno") or "void"},
+                )
 
     # ids cortos tipo EA (DUID) para poder referenciar, en la geometria de cada
     # conector del diagrama, las cajas de origen/destino ya colocadas
