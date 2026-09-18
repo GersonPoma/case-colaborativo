@@ -17,6 +17,7 @@ export class Toolbar {
   readonly exportandoXmiEa = input(false);
   readonly exportandoImagen = input(false);
   readonly importandoXmi = input(false);
+  readonly generandoBackend = input(false);
 
   readonly guardarVersion = output<void>();
   readonly centrar = output<void>();
@@ -25,6 +26,7 @@ export class Toolbar {
   readonly exportarXmiEa = output<void>();
   readonly exportarImagen = output<void>();
   readonly archivoXmiSeleccionado = output<File>();
+  readonly generarBackend = output<void>();
 
   alSeleccionarArchivo(evento: Event): void {
     const input = evento.target as HTMLInputElement;

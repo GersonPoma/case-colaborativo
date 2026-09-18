@@ -14,6 +14,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { Clase, TipoRelacion } from '../../../../core/models/lienzo.model';
 import { obtenerMensajeError } from '../../../../core/utils/http-error.util';
 import { Modal } from '../../../../shared/components/modal/modal';
+import { ConfiguracionTranspilacion } from '../../../interoperability/models/interoperability.model';
 import { InteroperabilidadApiService } from '../../../interoperability/services/interoperability-api.service';
 import { Colaborador, Proyecto, RolColaborador } from '../../../workspace/models/proyecto.model';
 import { WorkspaceApiService } from '../../../workspace/services/workspace-api.service';
@@ -68,6 +69,10 @@ export class Editor {
   readonly exportandoImagen = signal(false);
   readonly importandoXmi = signal(false);
   readonly archivoXmiPendiente = signal<File | null>(null);
+  readonly generandoBackend = signal(false);
+  readonly mostrarModalBackend = signal(false);
+  readonly cargandoConfigTranspilacion = signal(false);
+  readonly configTranspilacion = signal<ConfiguracionTranspilacion | null>(null);
 
   readonly modo = signal<ModoCanvas>('seleccionar');
   readonly claseSeleccionadaId = signal<string | null>(null);
@@ -299,6 +304,7 @@ export class Editor {
     this.descargarExportacion(
       this.interoperabilidadApi.exportarXmi(this.proyectoId),
       this.exportandoXmi,
+      'diagrama.xmi',
     );
   }
 
@@ -306,6 +312,7 @@ export class Editor {
     this.descargarExportacion(
       this.interoperabilidadApi.exportarXmiParaEa(this.proyectoId),
       this.exportandoXmiEa,
+      'diagrama_ea.xmi',
     );
   }
 
@@ -359,6 +366,36 @@ export class Editor {
     });
   }
 
+  abrirModalBackend(): void {
+    this.mostrarModalBackend.set(true);
+    this.cargandoConfigTranspilacion.set(true);
+    this.error.set(null);
+    this.interoperabilidadApi.obtenerConfiguracionTranspilacion(this.proyectoId).subscribe({
+      next: (config) => {
+        this.cargandoConfigTranspilacion.set(false);
+        this.configTranspilacion.set(config);
+      },
+      error: (err: unknown) => {
+        this.cargandoConfigTranspilacion.set(false);
+        this.mostrarModalBackend.set(false);
+        this.error.set(obtenerMensajeError(err));
+      },
+    });
+  }
+
+  cerrarModalBackend(): void {
+    this.mostrarModalBackend.set(false);
+  }
+
+  confirmarGenerarBackend(): void {
+    this.mostrarModalBackend.set(false);
+    this.descargarExportacion(
+      this.interoperabilidadApi.generarBackend(this.proyectoId),
+      this.generandoBackend,
+      'backend.zip',
+    );
+  }
+
   private slug(texto: string): string {
     const normalizado = texto
       .toLowerCase()
@@ -372,6 +409,7 @@ export class Editor {
   private descargarExportacion(
     peticion: Observable<HttpResponse<Blob>>,
     cargando: WritableSignal<boolean>,
+    nombrePorDefecto: string,
   ): void {
     cargando.set(true);
     this.error.set(null);
@@ -385,7 +423,7 @@ export class Editor {
         }
         const nombreArchivo =
           this.extraerNombreArchivo(respuesta.headers.get('content-disposition')) ??
-          'diagrama.xmi';
+          nombrePorDefecto;
         const url = URL.createObjectURL(contenido);
         const enlace = document.createElement('a');
         enlace.href = url;

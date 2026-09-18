@@ -53,6 +53,16 @@
     {{ exportandoImagen() ? 'Exportando...' : 'Exportar imagen' }}
   </button>
 
+  <button
+    type="button"
+    class="boton-herramienta"
+    [disabled]="generandoBackend()"
+    (click)="generarBackend.emit()"
+    title="Genera un proyecto Spring Boot a partir de este diagrama"
+  >
+    {{ generandoBackend() ? 'Generando...' : 'Generar Backend' }}
+  </button>
+
   @if (puedeEditar()) {
     <button
       type="button"

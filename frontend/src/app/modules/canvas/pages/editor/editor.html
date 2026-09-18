@@ -14,6 +14,7 @@
       [exportandoXmiEa]="exportandoXmiEa()"
       [exportandoImagen]="exportandoImagen()"
       [importandoXmi]="importandoXmi()"
+      [generandoBackend]="generandoBackend()"
       (centrar)="centrar()"
       (guardarVersion)="guardarVersion()"
       (deshacer)="canvasService.deshacer()"
@@ -21,6 +22,7 @@
       (exportarXmiEa)="exportarXmiEa()"
       (exportarImagen)="exportarImagen()"
       (archivoXmiSeleccionado)="alArchivoXmiSeleccionado($event)"
+      (generarBackend)="abrirModalBackend()"
     />
 
     @if (error()) {
@@ -79,5 +81,44 @@
         {{ importandoXmi() ? 'Importando...' : 'Reemplazar lienzo' }}
       </button>
     </div>
+  </app-modal>
+
+  <app-modal [abierto]="mostrarModalBackend()" ancho="460px" (cerrado)="cerrarModalBackend()">
+    <h2>Generar Backend</h2>
+    @if (cargandoConfigTranspilacion()) {
+      <p class="estado">Cargando configuración...</p>
+    } @else if (!configTranspilacion()?.configurado) {
+      <p>
+        Este proyecto todavía no tiene una configuración de transpilación. Configurala desde la
+        página del proyecto (sección "Interoperabilidad") antes de generar el backend.
+      </p>
+      <div class="acciones-form">
+        <button type="button" class="boton-secundario" (click)="cerrarModalBackend()">Cerrar</button>
+      </div>
+    } @else {
+      <p>Se va a generar un proyecto Spring Boot con esta configuración:</p>
+      <dl class="resumen-transpilacion">
+        <dt>Group ID</dt>
+        <dd>{{ configTranspilacion()?.group_id }}</dd>
+        <dt>Artifact ID</dt>
+        <dd>{{ configTranspilacion()?.artifact_id }}</dd>
+        <dt>Java</dt>
+        <dd>{{ configTranspilacion()?.java_version }}</dd>
+        <dt>Spring Boot</dt>
+        <dd>{{ configTranspilacion()?.spring_boot_version }}</dd>
+        <dt>Base de datos</dt>
+        <dd>{{ configTranspilacion()?.base_datos }}</dd>
+      </dl>
+      <p class="aviso-limitaciones">
+        Las relaciones de tipo <strong>Realización</strong> y <strong>Template Binding</strong> no
+        se incluyen en el código generado (no aplican a un backend CRUD con JPA).
+      </p>
+      <div class="acciones-form">
+        <button type="button" class="boton-secundario" (click)="cerrarModalBackend()">Cancelar</button>
+        <button type="button" class="boton-primario" [disabled]="generandoBackend()" (click)="confirmarGenerarBackend()">
+          {{ generandoBackend() ? 'Generando...' : 'Generar' }}
+        </button>
+      </div>
+    }
   </app-modal>
 }

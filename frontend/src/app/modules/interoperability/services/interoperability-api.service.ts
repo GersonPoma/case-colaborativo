@@ -48,4 +48,11 @@ export class InteroperabilidadApiService {
       formData,
     );
   }
+
+  generarBackend(proyectoId: number): Observable<HttpResponse<Blob>> {
+    return this.http.get(`${this.baseUrl}/${proyectoId}/transpilar`, {
+      responseType: 'blob',
+      observe: 'response',
+    });
+  }
 }
