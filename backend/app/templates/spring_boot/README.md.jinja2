@@ -36,7 +36,10 @@ Las relaciones del diagrama se traducen a JPA según su cardinalidad:
 
 - **Uno a muchos:** el lado "muchos" lleva la llave foránea (`@ManyToOne` + `@JoinColumn`), y el lado "uno" queda como inverso (`@OneToMany(mappedBy = ...)`).
 - **Muchos a muchos:** se genera una tabla intermedia con `@ManyToMany` + `@JoinTable`.
-- **Uno a uno:** como ningún lado es "muchos", no hay una regla de UML que decida quién lleva la llave foránea. Se definió que **la clase origen de la relación** (la primera que se conectó al trazarla en el lienzo) es la dueña: lleva la columna de llave foránea (`@JoinColumn`) hacia la clase destino, que queda como lado inverso (`@OneToOne(mappedBy = ...)`).
+- **Uno a uno:** como ningún lado es "muchos", se usó esta regla para decidir quién lleva la llave foránea y evitar una columna nula cuando se puede:
+  - Si uno de los dos extremos es exactamente `1` (obligatorio) y el otro es `0..1` (opcional), la llave foránea va en la clase **opuesta** a la que dice `1` (es decir, en la que su contraparte siempre existe), para que esa columna quede `NOT NULL`. Ejemplo: `Persona (1) --- (0..1) Pasaporte` — el "1" está junto a Persona, lo que garantiza que todo Pasaporte tiene una Persona, así que la llave foránea (`persona_id`) queda en **Pasaporte**, no en Persona.
+  - Si ambos extremos son `1`, o si ambos son `0..1`, no hay forma de evitar una columna nula en algún lado (o da igual), así que se usó la clase **origen** de la relación (la primera que se conectó al trazarla en el lienzo) como dueña por defecto.
+  - La clase dueña lleva `@OneToOne` + `@JoinColumn`; la otra queda como lado inverso (`@OneToOne(mappedBy = ...)`).
 - **Agregación / Composición:** se tratan igual que una asociación normal para la llave foránea; la composición además usa `cascade = CascadeType.ALL` y `orphanRemoval = true` del lado que contiene a la otra clase.
 - **Herencia:** se generan como herencia real de Java (`extends`) con `@Inheritance(strategy = InheritanceType.JOINED)` en la clase base.
 
