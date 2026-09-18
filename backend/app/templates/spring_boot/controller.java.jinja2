@@ -26,7 +26,7 @@ public class {{ nombre_clase }}Controller {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<{{ nombre_clase }}Response> obtener(@PathVariable Long id) {
+    public ResponseEntity<{{ nombre_clase }}Response> obtener(@PathVariable {{ pk_tipo_java }} id) {
         return ResponseEntity.ok(service.obtener(id));
     }
 
@@ -37,13 +37,13 @@ public class {{ nombre_clase }}Controller {
     }
 
     @PutMapping("/{id}")
-    public {{ nombre_clase }}Response actualizar(@PathVariable Long id, @Valid @RequestBody {{ nombre_clase }}Request datos) {
+    public {{ nombre_clase }}Response actualizar(@PathVariable {{ pk_tipo_java }} id, @Valid @RequestBody {{ nombre_clase }}Request datos) {
         return service.actualizar(id, datos);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminar(@PathVariable Long id) {
+    public void eliminar(@PathVariable {{ pk_tipo_java }} id) {
         service.eliminar(id);
     }
 }

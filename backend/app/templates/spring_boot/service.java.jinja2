@@ -30,7 +30,7 @@ public class {{ nombre_clase }}Service {
         return repository.findAll().stream().map(this::aRespuesta).toList();
     }
 
-    public {{ nombre_clase }}Response obtener(Long id) {
+    public {{ nombre_clase }}Response obtener({{ pk_tipo_java }} id) {
         return aRespuesta(buscarPorId(id));
     }
 
@@ -40,17 +40,17 @@ public class {{ nombre_clase }}Service {
         return aRespuesta(repository.save(entidad));
     }
 
-    public {{ nombre_clase }}Response actualizar(Long id, {{ nombre_clase }}Request datos) {
+    public {{ nombre_clase }}Response actualizar({{ pk_tipo_java }} id, {{ nombre_clase }}Request datos) {
         {{ nombre_clase }} entidad = buscarPorId(id);
         aplicarDatos(entidad, datos);
         return aRespuesta(repository.save(entidad));
     }
 
-    public void eliminar(Long id) {
+    public void eliminar({{ pk_tipo_java }} id) {
         repository.delete(buscarPorId(id));
     }
 
-    private {{ nombre_clase }} buscarPorId(Long id) {
+    private {{ nombre_clase }} buscarPorId({{ pk_tipo_java }} id) {
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("{{ nombre_clase }} no encontrado: " + id));
     }

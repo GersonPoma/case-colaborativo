@@ -22,11 +22,13 @@ public class {{ nombre_clase }}{% if extiende %} extends {{ extiende }}{% endif 
 
 {% if not extiende %}
     @Id
+{% if pk_generado %}
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+{% endif %}
+    {{ pk_modificador }}{{ pk_tipo_java }} id;
 {% endif %}
 {% for atributo in atributos %}
-    private {{ atributo.tipo_java }} {{ atributo.nombre }};
+    {{ atributo.modificador }}{{ atributo.tipo_java }} {{ atributo.nombre }};
 {% endfor %}
 {% for relacion in relaciones %}
     @{{ relacion.anotacion_completa }}
