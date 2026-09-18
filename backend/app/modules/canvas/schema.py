@@ -58,7 +58,7 @@ class Atributo(BaseModel):
 
 class ParametroMetodo(BaseModel):
     nombre: str
-    tipo: str
+    tipo: str | None = None
 
 
 class Metodo(BaseModel):
