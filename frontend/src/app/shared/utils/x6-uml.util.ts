@@ -85,7 +85,7 @@ function construirClaseDibujable(clase: Clase): ClaseDibujable {
     .sort((a, b) => a.orden - b.orden)
     .map((m) => {
       const simbolo = SIMBOLO_VISIBILIDAD[m.visibilidad] ?? '+';
-      const parametros = m.parametros.map((p) => `${p.nombre}: ${p.tipo}`).join(', ');
+      const parametros = m.parametros.map((p) => (p.tipo ? `${p.nombre}: ${p.tipo}` : p.nombre)).join(', ');
       const retorno = m.tipo_retorno || 'void';
       return `${simbolo} ${m.nombre}(${parametros}): ${retorno}`;
     });
