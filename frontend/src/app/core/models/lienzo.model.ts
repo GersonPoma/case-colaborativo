@@ -25,7 +25,7 @@ export interface Atributo {
 
 export interface ParametroMetodo {
   nombre: string;
-  tipo: string;
+  tipo: string | null;
 }
 
 export interface Metodo {
