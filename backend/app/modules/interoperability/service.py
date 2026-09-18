@@ -2,12 +2,14 @@ import re
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.exceptions import ConflictError
 from app.modules.interoperability.model import BaseDatosDestino, ConfiguracionTranspilacion
 from app.modules.interoperability.repository import ConfiguracionTranspilacionRepository
 from app.modules.interoperability.schema import (
     ConfigurarTranspilacion,
     ConfiguracionTranspilacionRespuesta,
 )
+from app.modules.interoperability.transpiler import generar_proyecto
 from app.modules.interoperability.xmi_export import construir_xmi
 from app.modules.interoperability.xmi_import import importar_xmi
 from app.modules.workspace.service import ProyectoService
@@ -123,3 +125,36 @@ class XmiImportService:
         proyecto = await self.proyecto_service.obtener(proyecto_id)
         await self.proyecto_service.verificar_editor(proyecto, id_usuario_solicitante)
         return importar_xmi(contenido)
+
+
+class TranspilacionService:
+    def __init__(self, db: AsyncSession):
+        self.db = db
+        self.proyecto_service = ProyectoService(db)
+        self.repository = ConfiguracionTranspilacionRepository(db)
+
+    async def generar(self, proyecto_id: int, id_usuario_solicitante: int) -> tuple[bytes, str]:
+        proyecto = await self.proyecto_service.obtener(proyecto_id)
+        await self.proyecto_service.verificar_miembro(proyecto, id_usuario_solicitante)
+
+        config = await self.repository.get_by_proyecto(proyecto_id)
+        if config is None:
+            raise ConflictError(
+                "El proyecto no tiene una configuracion de transpilacion. Configurala antes de generar el proyecto Spring Boot."
+            )
+
+        estado = proyecto.estado_lienzo or {"clases": {}, "relaciones": {}}
+        contenido = generar_proyecto(
+            estado.get("clases", {}),
+            estado.get("relaciones", {}),
+            proyecto.nombre,
+            {
+                "group_id": config.group_id,
+                "artifact_id": config.artifact_id,
+                "java_version": config.java_version,
+                "spring_boot_version": config.spring_boot_version,
+                "base_datos": config.base_datos,
+            },
+        )
+        nombre_archivo = f"{_slug(config.artifact_id)}.zip"
+        return contenido, nombre_archivo

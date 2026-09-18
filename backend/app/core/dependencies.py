@@ -11,6 +11,7 @@ from app.modules.auth.service import PerfilService, UsuarioService
 from app.modules.canvas.service import CanvasService
 from app.modules.interoperability.service import (
     ConfiguracionTranspilacionService,
+    TranspilacionService,
     XmiExportService,
     XmiImportService,
 )
@@ -66,6 +67,10 @@ async def get_xmi_export_service(db: AsyncSession = Depends(get_db)) -> XmiExpor
 
 async def get_xmi_import_service(db: AsyncSession = Depends(get_db)) -> XmiImportService:
     return XmiImportService(db)
+
+
+async def get_transpilacion_service(db: AsyncSession = Depends(get_db)) -> TranspilacionService:
+    return TranspilacionService(db)
 
 
 async def get_current_user(

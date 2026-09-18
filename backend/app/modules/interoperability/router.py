@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, Response, UploadFile
 from app.core.dependencies import (
     get_configuracion_transpilacion_service,
     get_current_user,
+    get_transpilacion_service,
     get_xmi_export_service,
     get_xmi_import_service,
 )
@@ -14,6 +15,7 @@ from app.modules.interoperability.schema import (
 )
 from app.modules.interoperability.service import (
     ConfiguracionTranspilacionService,
+    TranspilacionService,
     XmiExportService,
     XmiImportService,
 )
@@ -77,3 +79,17 @@ async def importar_xmi(
 ):
     contenido = await archivo.read()
     return await service.importar(proyecto_id, usuario.id, contenido)
+
+
+@router.get("/{proyecto_id}/transpilar")
+async def transpilar_spring_boot(
+    proyecto_id: int,
+    usuario: Usuario = Depends(get_current_user),
+    service: TranspilacionService = Depends(get_transpilacion_service),
+):
+    contenido, nombre_archivo = await service.generar(proyecto_id, usuario.id)
+    return Response(
+        content=contenido,
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{nombre_archivo}"'},
+    )
