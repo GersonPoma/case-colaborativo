@@ -136,7 +136,7 @@ export class ClassPanel {
       tipo_retorno: metodo.tipo_retorno ?? '',
       visibilidad: metodo.visibilidad,
     });
-    this.parametrosMetodo.set([...metodo.parametros]);
+    this.parametrosMetodo.set(metodo.parametros.map((p) => ({ ...p, tipo: p.tipo ?? '' })));
     this.editandoMetodoId.set(metodo.id);
   }
 
@@ -160,7 +160,9 @@ export class ClassPanel {
       return;
     }
     const valor = this.formMetodo.getRawValue();
-    const parametros = this.parametrosMetodo().filter((p) => p.nombre.trim() && p.tipo.trim());
+    const parametros = this.parametrosMetodo()
+      .filter((p) => p.nombre.trim())
+      .map((p) => ({ nombre: p.nombre.trim(), tipo: p.tipo?.trim() || null }));
     const datos = {
       nombre: valor.nombre,
       tipo_retorno: valor.tipo_retorno.trim() || null,
@@ -189,6 +191,6 @@ export class ClassPanel {
   }
 
   parametrosTexto(metodo: Metodo): string {
-    return metodo.parametros.map((p) => `${p.nombre}: ${p.tipo}`).join(', ');
+    return metodo.parametros.map((p) => (p.tipo ? `${p.nombre}: ${p.tipo}` : p.nombre)).join(', ');
   }
 }
