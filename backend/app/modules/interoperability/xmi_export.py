@@ -51,7 +51,6 @@ def _parsear_cardinalidad(valor: str | None) -> tuple[str, str] | None:
         inferior, superior = valor.split("..", 1)
     else:
         inferior = superior = valor
-    inferior = "0" if inferior == "*" else inferior
     return inferior, superior
 
 
@@ -400,13 +399,18 @@ def _emitir_multiplicidad(extremo: Element, id_extremo: str, valor: str | None) 
     if not cardinalidad:
         return
     inferior, superior = cardinalidad
+    # "*" (acotado o no) es LiteralUnlimitedNatural con value="-1": asi lo
+    # guarda EA en ambos extremos; escribirlo como "0" en el inferior hace que,
+    # al reimportar, un "*" suelto (ambos extremos sin limite) se lea como
+    # "0..*" en vez de "*"
+    tipo_inferior = "uml:LiteralUnlimitedNatural" if inferior == "*" else "uml:LiteralInteger"
     SubElement(
         extremo,
         "lowerValue",
         {
-            _qn(NS_XMI, "type"): "uml:LiteralInteger",
+            _qn(NS_XMI, "type"): tipo_inferior,
             _qn(NS_XMI, "id"): f"{id_extremo}_lower",
-            "value": inferior,
+            "value": "-1" if inferior == "*" else inferior,
         },
     )
     # EA solo colapsa la multiplicidad a un numero simple (ej. "1") cuando el limite
@@ -419,7 +423,7 @@ def _emitir_multiplicidad(extremo: Element, id_extremo: str, valor: str | None) 
         {
             _qn(NS_XMI, "type"): tipo_superior,
             _qn(NS_XMI, "id"): f"{id_extremo}_upper",
-            "value": superior,
+            "value": "-1" if superior == "*" else superior,
         },
     )
 
