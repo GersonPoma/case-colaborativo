@@ -41,6 +41,7 @@ _TIPOS_JAVA = {
     "localdatetime": "LocalDateTime",
     "decimal": "BigDecimal",
     "bigdecimal": "BigDecimal",
+    "void": "void",
 }
 
 # tipos que necesitan un import extra ademas de jakarta/lombok/java.util.List
@@ -113,7 +114,15 @@ def _segmento_paquete(texto: str) -> str:
 def _tipo_java(tipo_uml: str | None) -> str:
     if not tipo_uml:
         return "String"
-    return _TIPOS_JAVA.get(tipo_uml.strip().lower(), _pascal(tipo_uml))
+    texto = tipo_uml.strip()
+    tipo_conocido = _TIPOS_JAVA.get(texto.lower())
+    if tipo_conocido:
+        return tipo_conocido
+    # un tipo no reconocido (no es un primitivo/wrapper que ya mapeamos):
+    # si empieza en mayuscula probablemente sea el nombre de una clase (del
+    # diagrama o no), asi que se usa Object en vez de inventar un nombre de
+    # tipo que no existe y no compila; si no, se asume texto libre
+    return "Object" if texto and texto[0].isupper() else "String"
 
 
 def _es_muchos(cardinalidad: str | None) -> bool:
@@ -169,10 +178,16 @@ class _ContextoClase:
         self.imports_dto: set[str] = set()
         self.imports_validacion: set[str] = set()
         self.imports_service: set[str] = set()
+        self.metodos_interfaz: list[dict] = []  # metodos PUBLICO: van en la interfaz + @Override en la impl
+        self.metodos_extra: list[dict] = []  # metodos no publicos: solo en la impl, sin interfaz
+        self.nombres_metodos_usados: set[str] = {"listar", "obtener", "crear", "actualizar", "eliminar"}
+        self.imports_metodos: set[str] = set()  # de metodos PUBLICO: van en la interfaz y en la impl
+        self.imports_metodos_impl: set[str] = set()  # de metodos no publicos: solo en la impl
 
 
 def _construir_contextos(clases: dict, relaciones: dict) -> dict[str, _ContextoClase]:
     contextos = {cid: _ContextoClase(cid, clase) for cid, clase in clases.items()}
+    nombre_a_clase_id = {ctx.nombre_clase: ctx.clase_id for ctx in contextos.values()}
 
     for ctx in contextos.values():
         clase = clases[ctx.clase_id]
@@ -268,8 +283,70 @@ def _construir_contextos(clases: dict, relaciones: dict) -> dict[str, _ContextoC
             ctx.asignaciones.append(
                 f"entidad.set{_pascal(nombre_campo)}(datos.{nombre_campo}());"
             )
+        _procesar_metodos(ctx, clase, nombre_a_clase_id)
 
     return contextos
+
+
+def _procesar_metodos(ctx: "_ContextoClase", clase: dict, nombre_a_clase_id: dict[str, str]) -> None:
+    """Los metodos del diagrama no tienen logica de negocio (son solo firma),
+    asi que se generan como stub: los PUBLICO van en la interfaz del service
+    (con @Override en la implementacion), el resto se agregan directo en la
+    implementacion con su propio modificador. El cuerpo de todos queda con un
+    TODO y un valor de retorno vacio (null, o nada si es void).
+
+    Si un tipo de parametro/retorno coincide con otra clase del diagrama: en
+    metodos PUBLICO (que son parte del contrato del service, hacia afuera) se
+    usa el DTO Response de esa clase, igual que el resto del CRUD nunca
+    expone la entidad JPA; en metodos no publicos (que nunca salen de la
+    implementacion, son detalle interno) se usa la entidad real."""
+    metodos = sorted(clase.get("metodos", {}).values(), key=lambda m: m.get("orden", 0))
+    for metodo in metodos:
+        es_publico = metodo.get("visibilidad") == "PUBLICO"
+        nombre_java = _campo_unico(_camel(metodo["nombre"]), ctx.nombres_metodos_usados)
+        tipo_retorno = (
+            _resolver_tipo_metodo(ctx, metodo.get("tipo_retorno"), es_publico, nombre_a_clase_id) or "void"
+        )
+
+        nombres_parametros_usados: set[str] = set()
+        parametros_java = []
+        for parametro in metodo.get("parametros", []):
+            nombre_parametro = _campo_unico(_camel(parametro["nombre"]), nombres_parametros_usados)
+            tipo_parametro = (
+                _resolver_tipo_metodo(ctx, parametro.get("tipo"), es_publico, nombre_a_clase_id) or "String"
+            )
+            parametros_java.append(f"{tipo_parametro} {nombre_parametro}")
+
+        info = {
+            "tipo_retorno": tipo_retorno,
+            "firma": f"{nombre_java}({', '.join(parametros_java)})",
+            "cuerpo_return": None if tipo_retorno == "void" else "return null;",
+            "modificador": _MODIFICADOR_JAVA.get(metodo.get("visibilidad"), "private "),
+        }
+        if es_publico:
+            ctx.metodos_interfaz.append(info)
+        else:
+            ctx.metodos_extra.append(info)
+
+
+def _resolver_tipo_metodo(
+    ctx: "_ContextoClase", tipo_uml: str | None, es_publico: bool, nombre_a_clase_id: dict[str, str]
+) -> str | None:
+    """None si no hay tipo (el llamador aplica su propio default: void para
+    retorno, String para parametro)."""
+    if not tipo_uml:
+        return None
+    nombre_clase_ref = _pascal(tipo_uml)
+    clase_id_ref = nombre_a_clase_id.get(nombre_clase_ref)
+    if clase_id_ref:
+        if es_publico:
+            ctx.imports_metodos.add(f"__DTO_RESPONSE__{clase_id_ref}")
+            return f"{nombre_clase_ref}Response"
+        ctx.imports_metodos_impl.add(f"__ENTITY__{clase_id_ref}")
+        return nombre_clase_ref
+    tipo = _tipo_java(tipo_uml)
+    _registrar_import_tipo(ctx.imports_metodos if es_publico else ctx.imports_metodos_impl, tipo)
+    return tipo
 
 
 def _campo_unico(nombre_base: str, usados: set[str]) -> str:
@@ -286,6 +363,29 @@ def _registrar_import_tipo(imports: set[str], tipo_java: str) -> None:
     extra = _IMPORTS_POR_TIPO_JAVA.get(tipo_java)
     if extra:
         imports.add(extra)
+
+
+def _resolver_marcadores_import(
+    imports_con_marcadores: set[str], contextos: dict[str, "_ContextoClase"], paquete_base: str
+) -> set[str]:
+    """Los imports que dependen de otra clase (repositorio, DTO Response,
+    entidad) se guardan como marcador con el id de esa clase, porque el
+    paquete final no se conoce hasta ahora. Un import que ya viene resuelto
+    (ej. "java.time.LocalDate") se deja igual."""
+    resueltos: set[str] = set()
+    for item in imports_con_marcadores:
+        if item.startswith("__REPO__"):
+            clase = contextos[item[len("__REPO__") :]]
+            resueltos.add(f"{paquete_base}.repository.{clase.nombre_clase}Repository")
+        elif item.startswith("__DTO_RESPONSE__"):
+            clase = contextos[item[len("__DTO_RESPONSE__") :]]
+            resueltos.add(f"{paquete_base}.dto.response.{clase.nombre_clase}Response")
+        elif item.startswith("__ENTITY__"):
+            clase = contextos[item[len("__ENTITY__") :]]
+            resueltos.add(f"{paquete_base}.entity.{clase.nombre_clase}")
+        else:
+            resueltos.add(item)
+    return resueltos
 
 
 def _agregar_muchos_a_muchos(rel_id: str, origen: _ContextoClase, destino: _ContextoClase) -> None:
@@ -438,15 +538,14 @@ def generar_proyecto(
     bd_info = _BD_INFO[bd if isinstance(bd, str) else bd.value]
 
     contextos = _construir_contextos(clases, relaciones)
-    # resuelve los imports de repositorio que quedaron como marcador
+    # resuelve los imports que quedaron como marcador (repositorio, DTO
+    # Response o entidad de otra clase) ahora que ya se conoce el paquete
     for ctx in contextos.values():
-        imports_repo = set()
-        for marcador in ctx.imports_service:
-            if marcador.startswith("__REPO__"):
-                clase_id_relacionada = marcador[len("__REPO__") :]
-                nombre_clase_relacionada = contextos[clase_id_relacionada].nombre_clase
-                imports_repo.add(f"{paquete_base}.repository.{nombre_clase_relacionada}Repository")
-        ctx.imports_service = imports_repo
+        ctx.imports_service = _resolver_marcadores_import(ctx.imports_service, contextos, paquete_base)
+        ctx.imports_metodos = _resolver_marcadores_import(ctx.imports_metodos, contextos, paquete_base)
+        ctx.imports_metodos_impl = _resolver_marcadores_import(
+            ctx.imports_metodos_impl, contextos, paquete_base
+        )
 
     buffer = BytesIO()
     with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zf:
@@ -537,14 +636,26 @@ def generar_proyecto(
             )
             zf.writestr(
                 f"{raiz}src/main/java/{ruta_paquete}/service/{ctx.nombre_clase}Service.java",
+                _env.get_template("service_interface.java.jinja2").render(
+                    paquete_base=paquete_base,
+                    imports=sorted(ctx.imports_metodos),
+                    nombre_clase=ctx.nombre_clase,
+                    pk_tipo_java=ctx.pk_tipo_java,
+                    metodos=ctx.metodos_interfaz,
+                ),
+            )
+            zf.writestr(
+                f"{raiz}src/main/java/{ruta_paquete}/service/impl/{ctx.nombre_clase}ServiceImpl.java",
                 _env.get_template("service.java.jinja2").render(
                     paquete_base=paquete_base,
-                    imports=sorted(ctx.imports_service),
+                    imports=sorted(ctx.imports_service | ctx.imports_metodos | ctx.imports_metodos_impl),
                     nombre_clase=ctx.nombre_clase,
                     pk_tipo_java=ctx.pk_tipo_java,
                     dependencias=list(ctx.dependencias_servicio.values()),
                     asignaciones=ctx.asignaciones,
                     argumentos_respuesta=ctx.argumentos_respuesta,
+                    metodos_interfaz=ctx.metodos_interfaz,
+                    metodos_extra=ctx.metodos_extra,
                 ),
             )
             zf.writestr(

@@ -1,0 +1,26 @@
+package {{ paquete_base }}.service;
+
+import {{ paquete_base }}.dto.request.{{ nombre_clase }}Request;
+import {{ paquete_base }}.dto.response.{{ nombre_clase }}Response;
+{% for import in imports %}
+import {{ import }};
+{% endfor %}
+
+import java.util.List;
+
+public interface {{ nombre_clase }}Service {
+
+    List<{{ nombre_clase }}Response> listar();
+
+    {{ nombre_clase }}Response obtener({{ pk_tipo_java }} id);
+
+    {{ nombre_clase }}Response crear({{ nombre_clase }}Request datos);
+
+    {{ nombre_clase }}Response actualizar({{ pk_tipo_java }} id, {{ nombre_clase }}Request datos);
+
+    void eliminar({{ pk_tipo_java }} id);
+{% for metodo in metodos %}
+
+    {{ metodo.tipo_retorno }} {{ metodo.firma }};
+{% endfor %}
+}

@@ -1,9 +1,10 @@
-package {{ paquete_base }}.service;
+package {{ paquete_base }}.service.impl;
 
 import {{ paquete_base }}.dto.request.{{ nombre_clase }}Request;
 import {{ paquete_base }}.dto.response.{{ nombre_clase }}Response;
 import {{ paquete_base }}.entity.{{ nombre_clase }};
 import {{ paquete_base }}.repository.{{ nombre_clase }}Repository;
+import {{ paquete_base }}.service.{{ nombre_clase }}Service;
 {% for import in imports %}
 import {{ import }};
 {% endfor %}
@@ -12,43 +13,67 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class {{ nombre_clase }}Service {
+public class {{ nombre_clase }}ServiceImpl implements {{ nombre_clase }}Service {
 
     private final {{ nombre_clase }}Repository repository;
 {% for dependencia in dependencias %}
     private final {{ dependencia.tipo }} {{ dependencia.nombre }};
 {% endfor %}
 
-    public {{ nombre_clase }}Service({{ nombre_clase }}Repository repository{% for dependencia in dependencias %}, {{ dependencia.tipo }} {{ dependencia.nombre }}{% endfor %}) {
+    public {{ nombre_clase }}ServiceImpl({{ nombre_clase }}Repository repository{% for dependencia in dependencias %}, {{ dependencia.tipo }} {{ dependencia.nombre }}{% endfor %}) {
         this.repository = repository;
 {% for dependencia in dependencias %}
         this.{{ dependencia.nombre }} = {{ dependencia.nombre }};
 {% endfor %}
     }
 
+    @Override
     public List<{{ nombre_clase }}Response> listar() {
         return repository.findAll().stream().map(this::aRespuesta).toList();
     }
 
+    @Override
     public {{ nombre_clase }}Response obtener({{ pk_tipo_java }} id) {
         return aRespuesta(buscarPorId(id));
     }
 
+    @Override
     public {{ nombre_clase }}Response crear({{ nombre_clase }}Request datos) {
         {{ nombre_clase }} entidad = new {{ nombre_clase }}();
         aplicarDatos(entidad, datos);
         return aRespuesta(repository.save(entidad));
     }
 
+    @Override
     public {{ nombre_clase }}Response actualizar({{ pk_tipo_java }} id, {{ nombre_clase }}Request datos) {
         {{ nombre_clase }} entidad = buscarPorId(id);
         aplicarDatos(entidad, datos);
         return aRespuesta(repository.save(entidad));
     }
 
+    @Override
     public void eliminar({{ pk_tipo_java }} id) {
         repository.delete(buscarPorId(id));
     }
+{% for metodo in metodos_interfaz %}
+
+    @Override
+    public {{ metodo.tipo_retorno }} {{ metodo.firma }} {
+        // TODO: implementar
+{% if metodo.cuerpo_return %}
+        {{ metodo.cuerpo_return }}
+{% endif %}
+    }
+{% endfor %}
+{% for metodo in metodos_extra %}
+
+    {{ metodo.modificador }}{{ metodo.tipo_retorno }} {{ metodo.firma }} {
+        // TODO: implementar
+{% if metodo.cuerpo_return %}
+        {{ metodo.cuerpo_return }}
+{% endif %}
+    }
+{% endfor %}
 
     private {{ nombre_clase }} buscarPorId({{ pk_tipo_java }} id) {
         return repository.findById(id)
