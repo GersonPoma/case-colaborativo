@@ -42,7 +42,17 @@ _TIPOS_JAVA = {
     "decimal": "BigDecimal",
     "bigdecimal": "BigDecimal",
     "void": "void",
+    "text": "String",
+    "texto": "String",
 }
+
+# tipos que ademas de mapear a String, necesitan @Lob en la entidad (JPA
+# los guarda en una columna TEXT/CLOB en vez del VARCHAR(255) por defecto)
+_TIPOS_TEXTO_LARGO = {"text", "texto"}
+
+
+def _es_texto_largo(tipo_uml: str | None) -> bool:
+    return bool(tipo_uml) and tipo_uml.strip().lower() in _TIPOS_TEXTO_LARGO
 
 # tipos que necesitan un import extra ademas de jakarta/lombok/java.util.List
 _IMPORTS_POR_TIPO_JAVA = {
@@ -277,6 +287,7 @@ def _construir_contextos(clases: dict, relaciones: dict) -> dict[str, _ContextoC
                     "tipo_java": tipo_java,
                     "validacion": validacion,
                     "modificador": modificador,
+                    "lob": _es_texto_largo(attr.get("tipo")),
                 }
             )
             ctx.argumentos_respuesta.append(f"entidad.get{_pascal(nombre_campo)}()")

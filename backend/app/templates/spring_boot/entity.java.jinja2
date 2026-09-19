@@ -28,6 +28,9 @@ public class {{ nombre_clase }}{% if extiende %} extends {{ extiende }}{% endif 
     {{ pk_modificador }}{{ pk_tipo_java }} id;
 {% endif %}
 {% for atributo in atributos %}
+{% if atributo.lob %}
+    @Lob
+{% endif %}
     {{ atributo.modificador }}{{ atributo.tipo_java }} {{ atributo.nombre }};
 {% endfor %}
 {% for relacion in relaciones %}
