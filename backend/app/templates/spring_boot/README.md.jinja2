@@ -24,8 +24,8 @@ mvn spring-boot:run
 Por cada clase del diagrama se generan estos archivos, todos bajo el paquete `{{ paquete_base }}`:
 
 - `entity/` — la entidad JPA (`@Entity`), con Lombok (`@Getter`, `@Setter`, `@NoArgsConstructor`, `@AllArgsConstructor`) para no escribir getters/setters/constructores a mano.
-- `dto/request/` — un `record` de entrada (`...Request`, sin id). Las relaciones se exponen como el id de la clase relacionada, no como el objeto completo.
-- `dto/response/` — un `record` de salida (`...Response`, con id). Igual que el de entrada, las relaciones se exponen como id.
+- `dto/request/` — un `record` de entrada (`...Request`, sin id). Las relaciones donde la clase es la dueña de la llave foránea (`@ManyToOne`/`@OneToOne`) se exponen como el id de la clase relacionada, no como el objeto completo.
+- `dto/response/` — un `record` de salida (`...Response`, con id). Igual que el de entrada, esas relaciones se exponen como id. Las colecciones (`@OneToMany`, `@ManyToMany`) **no aparecen en ningún DTO** — existen en la entidad, pero el CRUD generado no las expone. Si necesitás, por ejemplo, "los libros de un autor", hay que agregar a mano un endpoint o campo para eso.
 - `repository/` — interfaz `JpaRepository` sin métodos extra (ya trae el CRUD básico).
 - `service/` — interfaz `...Service` con el contrato: el CRUD más los métodos públicos que tenía la clase en el diagrama.
 - `service/impl/` — `...ServiceImpl`, la implementación: el CRUD real (mapea entre entidad y DTOs, resuelve relaciones por id) y los métodos del diagrama como *stub* (ver más abajo).
