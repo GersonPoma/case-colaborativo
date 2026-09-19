@@ -27,8 +27,9 @@ Por cada clase del diagrama se generan estos archivos, todos bajo el paquete `{{
 - `dto/request/` — un `record` de entrada (`...Request`, sin id). Las relaciones se exponen como el id de la clase relacionada, no como el objeto completo.
 - `dto/response/` — un `record` de salida (`...Response`, con id). Igual que el de entrada, las relaciones se exponen como id.
 - `repository/` — interfaz `JpaRepository` sin métodos extra (ya trae el CRUD básico).
-- `service/` — lógica CRUD: mapea entre entidad y DTOs, y resuelve las relaciones buscando la entidad relacionada por su id.
-- `controller/` — endpoints REST (`GET`, `POST`, `PUT`, `DELETE`) sobre `/api/...`.
+- `service/` — interfaz `...Service` con el contrato: el CRUD más los métodos públicos que tenía la clase en el diagrama.
+- `service/impl/` — `...ServiceImpl`, la implementación: el CRUD real (mapea entre entidad y DTOs, resuelve relaciones por id) y los métodos del diagrama como *stub* (ver más abajo).
+- `controller/` — endpoints REST (`GET`, `POST`, `PUT`, `DELETE`) sobre `/api/...`. Depende de la interfaz `...Service`, no de la implementación.
 
 ## Relaciones y llave foránea
 
@@ -42,6 +43,18 @@ Las relaciones del diagrama se traducen a JPA según su cardinalidad:
   - La clase dueña lleva `@OneToOne` + `@JoinColumn`; la otra queda como lado inverso (`@OneToOne(mappedBy = ...)`).
 - **Agregación / Composición:** se tratan igual que una asociación normal para la llave foránea; la composición además usa `cascade = CascadeType.ALL` y `orphanRemoval = true` del lado que contiene a la otra clase.
 - **Herencia:** se generan como herencia real de Java (`extends`) con `@Inheritance(strategy = InheritanceType.JOINED)` en la clase base.
+
+## Métodos del diagrama
+
+Un método de una clase en el diagrama es solo una firma (nombre, parámetros, tipo de retorno): no hay forma de saber qué lógica de negocio debería tener, así que se genera como *stub* para completar a mano:
+
+- Los métodos **públicos** quedan en la interfaz `...Service` y se implementan en `...ServiceImpl` con `@Override`.
+- Los métodos **privados/protegidos/de paquete** no pueden declararse en una interfaz de Java, así que se agregan directo en `...ServiceImpl` con su propio modificador, sin pasar por la interfaz.
+- El cuerpo de todos queda con `// TODO: implementar` y, si el método no es `void`, un `return null;` para que compile mientras tanto.
+- Un parámetro o tipo de retorno sin especificar se asume `void` (retorno) o `String` (parámetro).
+- Si el tipo coincide con el nombre de otra clase del diagrama (por ejemplo un método que devuelve `Categoria`): en un método **público** se usa `CategoriaResponse` (el DTO), igual que el resto del CRUD nunca expone la entidad hacia afuera; en un método **no público** (que nunca sale de `...ServiceImpl`) se usa la entidad real `Categoria`, porque ahí no hay ninguna frontera de API que cuidar.
+- Si el tipo no coincide con ninguna clase del diagrama ni es un tipo reconocido (`int`, `String`, `double`, etc.), se usa `Object` como último recurso para que compile.
+- Si dos métodos (o un método y una operación del CRUD, como `listar`) terminan con el mismo nombre, se le agrega un número al segundo para que compile (`listar2`).
 
 ## Nota
 
