@@ -193,6 +193,12 @@ class _ContextoClase:
         self.nombres_metodos_usados: set[str] = {"listar", "obtener", "crear", "actualizar", "eliminar"}
         self.imports_metodos: set[str] = set()  # de metodos PUBLICO: van en la interfaz y en la impl
         self.imports_metodos_impl: set[str] = set()  # de metodos no publicos: solo en la impl
+        # clase asociada (AssociationClass) sin id propio: se identifica con
+        # la combinacion de las dos clases que relaciona en vez de un id
+        # sintetico, usando una clave compuesta @Embeddable
+        self.usa_id_compuesto = False
+        self.id_compuesto_clase: str | None = None
+        self.id_compuesto_campos: list[dict] = []  # [{nombre_id, nombre_relacion, tipo_java}, ...]
 
 
 def _construir_contextos(clases: dict, relaciones: dict) -> dict[str, _ContextoClase]:
@@ -230,7 +236,12 @@ def _construir_contextos(clases: dict, relaciones: dict) -> dict[str, _ContextoC
             continue
         if tipo in ("REALIZACION", "TEMPLATE_BINDING"):
             continue
-        if rel.get("clase_asociada_id"):
+        clase_asociada_id = rel.get("clase_asociada_id")
+        if clase_asociada_id:
+            if clase_asociada_id in contextos:
+                _agregar_clase_asociada(
+                    contextos[clase_asociada_id], contextos[origen_id], contextos[destino_id]
+                )
             continue
 
         card_origen = rel.get("cardinalidad_origen")
@@ -262,10 +273,32 @@ def _construir_contextos(clases: dict, relaciones: dict) -> dict[str, _ContextoC
     for ctx in contextos.values():
         clase = clases[ctx.clase_id]
         atributos = sorted(clase.get("atributos", {}).values(), key=lambda a: a.get("orden", 0))
-        ctx.campos_dto.append(
-            {"nombre": "id", "tipo_java": ctx.pk_tipo_java, "validacion": None, "modificador": ctx.pk_modificador}
-        )
-        ctx.argumentos_respuesta.append("entidad.getId()")
+        if ctx.usa_id_compuesto:
+            for campo_id in ctx.id_compuesto_campos:
+                ctx.campos_dto.append(
+                    {
+                        "nombre": campo_id["nombre_id"],
+                        "tipo_java": campo_id["tipo_java"],
+                        "validacion": "NotNull",
+                        "modificador": None,
+                    }
+                )
+                ctx.imports_validacion.add("jakarta.validation.constraints.NotNull")
+                nombre_pascal = _pascal(campo_id["nombre_relacion"])
+                ctx.argumentos_respuesta.append(
+                    f"entidad.get{nombre_pascal}() != null ? entidad.get{nombre_pascal}().getId() : null"
+                )
+                ctx.nombres_usados.add(campo_id["nombre_id"])
+        else:
+            ctx.campos_dto.append(
+                {
+                    "nombre": "id",
+                    "tipo_java": ctx.pk_tipo_java,
+                    "validacion": None,
+                    "modificador": ctx.pk_modificador,
+                }
+            )
+            ctx.argumentos_respuesta.append("entidad.getId()")
         # "id" ya esta tomado por el campo @Id de arriba: si otro atributo
         # (sin marcar como PK) tambien se llama "id", debe renombrarse en vez
         # de colisionar (sino el record de respuesta queda con dos campos
@@ -528,6 +561,65 @@ def _agregar_uno_a_uno(
     inverso.imports_entity.add("com.fasterxml.jackson.annotation.JsonIgnore")
 
 
+def _agregar_clase_asociada(
+    asociada: _ContextoClase, origen: _ContextoClase, destino: _ContextoClase
+) -> None:
+    """Una relacion con clase asociada (AssociationClass) equivale a
+    descomponer un muchos-a-muchos en dos relaciones uno-a-muchos hacia una
+    clase intermedia: la asociada siempre necesita las dos puntas (no puede
+    existir sin origen ni sin destino), asi que ambas FK son obligatorias
+    sin importar la cardinalidad que traiga la relacion."""
+    if asociada.pk_atributo_id is not None:
+        # tiene su propio id: entidad normal con dos FK obligatorias
+        _agregar_uno_a_muchos(asociada, origen, False, "1")
+        _agregar_uno_a_muchos(asociada, destino, False, "1")
+        return
+
+    # sin id propio: la identidad es la combinacion de las dos relaciones,
+    # con una clave compuesta @Embeddable (ver embeddable_id.java.jinja2)
+    campo_origen = _campo_unico(_camel(origen.nombre_clase), asociada.nombres_usados)
+    campo_destino = _campo_unico(_camel(destino.nombre_clase), asociada.nombres_usados)
+    asociada.usa_id_compuesto = True
+    asociada.id_compuesto_clase = f"{origen.nombre_clase}{destino.nombre_clase}Id"
+    asociada.id_compuesto_campos = [
+        {"nombre_id": f"{campo_origen}Id", "nombre_relacion": campo_origen, "tipo_java": origen.pk_tipo_java},
+        {"nombre_id": f"{campo_destino}Id", "nombre_relacion": campo_destino, "tipo_java": destino.pk_tipo_java},
+    ]
+
+    for campo, clase_relacionada in ((campo_origen, origen), (campo_destino, destino)):
+        columna_fk = f"{_snake(clase_relacionada.nombre_clase)}_id"
+        asociada.relaciones_entidad.append(
+            {
+                "anotacion_completa": "ManyToOne(fetch = FetchType.LAZY)",
+                "lineas_extra": [
+                    f'@MapsId("{campo}Id")',
+                    f'@JoinColumn(name = "{columna_fk}", nullable = false)',
+                ],
+                "tipo_campo": clase_relacionada.nombre_clase,
+                "nombre_campo": campo,
+            }
+        )
+        nombre_repo = f"{clase_relacionada.nombre_clase}Repository"
+        asociada.dependencias_servicio[nombre_repo] = {"tipo": nombre_repo, "nombre": _camel(nombre_repo)}
+        asociada.imports_service.add(f"__REPO__{clase_relacionada.clase_id}")
+        asociada.asignaciones.append(
+            f"entidad.set{_pascal(campo)}(datos.{campo}Id() != null ? "
+            f"{_camel(nombre_repo)}.findById(datos.{campo}Id()).orElse(null) : null);"
+        )
+
+        campo_coleccion = _campo_unico(_camel(asociada.nombre_clase) + "List", clase_relacionada.nombres_usados)
+        clase_relacionada.relaciones_entidad.append(
+            {
+                "anotacion_completa": f'OneToMany(mappedBy = "{campo}")',
+                "lineas_extra": ["@JsonIgnore"],
+                "tipo_campo": f"List<{asociada.nombre_clase}>",
+                "nombre_campo": campo_coleccion,
+            }
+        )
+        clase_relacionada.imports_entity.add("java.util.List")
+        clase_relacionada.imports_entity.add("com.fasterxml.jackson.annotation.JsonIgnore")
+
+
 def generar_proyecto(
     clases: dict,
     relaciones: dict,
@@ -603,6 +695,16 @@ def generar_proyecto(
         )
 
         for ctx in contextos.values():
+            id_vars = _variables_id(ctx)
+            if ctx.usa_id_compuesto:
+                zf.writestr(
+                    f"{raiz}src/main/java/{ruta_paquete}/entity/{ctx.id_compuesto_clase}.java",
+                    _env.get_template("embeddable_id.java.jinja2").render(
+                        paquete_base=paquete_base,
+                        nombre_clase=ctx.id_compuesto_clase,
+                        campos=ctx.id_compuesto_campos,
+                    ),
+                )
             zf.writestr(
                 f"{raiz}src/main/java/{ruta_paquete}/entity/{ctx.nombre_clase}.java",
                 _env.get_template("entity.java.jinja2").render(
@@ -615,6 +717,8 @@ def generar_proyecto(
                     pk_tipo_java=ctx.pk_tipo_java,
                     pk_generado=ctx.pk_generado,
                     pk_modificador=ctx.pk_modificador,
+                    usa_id_compuesto=ctx.usa_id_compuesto,
+                    id_compuesto_clase=ctx.id_compuesto_clase,
                     atributos=_atributos_entidad(ctx),
                     relaciones=ctx.relaciones_entidad,
                 ),
@@ -642,7 +746,8 @@ def generar_proyecto(
                 _env.get_template("repository.java.jinja2").render(
                     paquete_base=paquete_base,
                     nombre_clase=ctx.nombre_clase,
-                    pk_tipo_java=ctx.pk_tipo_java,
+                    pk_tipo_java=ctx.id_compuesto_clase if ctx.usa_id_compuesto else ctx.pk_tipo_java,
+                    id_compuesto_clase=ctx.id_compuesto_clase,
                 ),
             )
             zf.writestr(
@@ -651,7 +756,7 @@ def generar_proyecto(
                     paquete_base=paquete_base,
                     imports=sorted(ctx.imports_metodos),
                     nombre_clase=ctx.nombre_clase,
-                    pk_tipo_java=ctx.pk_tipo_java,
+                    parametros_id=id_vars["parametros_id"],
                     metodos=ctx.metodos_interfaz,
                 ),
             )
@@ -661,7 +766,11 @@ def generar_proyecto(
                     paquete_base=paquete_base,
                     imports=sorted(ctx.imports_service | ctx.imports_metodos | ctx.imports_metodos_impl),
                     nombre_clase=ctx.nombre_clase,
-                    pk_tipo_java=ctx.pk_tipo_java,
+                    id_compuesto_clase=ctx.id_compuesto_clase,
+                    parametros_id=id_vars["parametros_id"],
+                    argumentos_id=id_vars["argumentos_id"],
+                    argumento_find_by_id=id_vars["argumento_find_by_id"],
+                    expresion_error_id=id_vars["expresion_error_id"],
                     dependencias=list(ctx.dependencias_servicio.values()),
                     asignaciones=ctx.asignaciones,
                     argumentos_respuesta=ctx.argumentos_respuesta,
@@ -674,12 +783,49 @@ def generar_proyecto(
                 _env.get_template("controller.java.jinja2").render(
                     paquete_base=paquete_base,
                     nombre_clase=ctx.nombre_clase,
-                    pk_tipo_java=ctx.pk_tipo_java,
+                    parametros_id_controller=id_vars["parametros_id_controller"],
+                    argumentos_id=id_vars["argumentos_id"],
+                    anotacion_obtener=id_vars["anotacion_obtener"],
+                    anotacion_actualizar=id_vars["anotacion_actualizar"],
+                    anotacion_eliminar=id_vars["anotacion_eliminar"],
                     nombre_recurso=_recurso_url(ctx.nombre_clase),
                 ),
             )
 
     return buffer.getvalue()
+
+
+def _variables_id(ctx: _ContextoClase) -> dict[str, str]:
+    """Arma, en un solo lugar, todos los fragmentos de codigo que dependen de
+    si la clase usa un id simple o una clave compuesta (@EmbeddedId): asi las
+    plantillas de service/controller no necesitan ramas condicionales, solo
+    insertan el string ya resuelto."""
+    if not ctx.usa_id_compuesto:
+        return {
+            "parametros_id": f"{ctx.pk_tipo_java} id",
+            "argumentos_id": "id",
+            "argumento_find_by_id": "id",
+            "expresion_error_id": "id",
+            "parametros_id_controller": f"@PathVariable {ctx.pk_tipo_java} id",
+            "anotacion_obtener": '@GetMapping("/{id}")',
+            "anotacion_actualizar": '@PutMapping("/{id}")',
+            "anotacion_eliminar": '@DeleteMapping("/{id}")',
+        }
+    nombres = [c["nombre_id"] for c in ctx.id_compuesto_campos]
+    argumentos_id = ", ".join(nombres)
+    campos_query = ", ".join(f'"{n}"' for n in nombres)
+    return {
+        "parametros_id": ", ".join(f"{c['tipo_java']} {c['nombre_id']}" for c in ctx.id_compuesto_campos),
+        "argumentos_id": argumentos_id,
+        "argumento_find_by_id": f"new {ctx.id_compuesto_clase}({argumentos_id})",
+        "expresion_error_id": ' + ", " + '.join(nombres),
+        "parametros_id_controller": ", ".join(
+            f"@RequestParam {c['tipo_java']} {c['nombre_id']}" for c in ctx.id_compuesto_campos
+        ),
+        "anotacion_obtener": f"@GetMapping(params = {{{campos_query}}})",
+        "anotacion_actualizar": "@PutMapping",
+        "anotacion_eliminar": "@DeleteMapping",
+    }
 
 
 def _atributos_entidad(ctx: _ContextoClase) -> list[dict]:

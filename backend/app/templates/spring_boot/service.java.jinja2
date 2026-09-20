@@ -3,6 +3,9 @@ package {{ paquete_base }}.service.impl;
 import {{ paquete_base }}.dto.request.{{ nombre_clase }}Request;
 import {{ paquete_base }}.dto.response.{{ nombre_clase }}Response;
 import {{ paquete_base }}.entity.{{ nombre_clase }};
+{% if id_compuesto_clase %}
+import {{ paquete_base }}.entity.{{ id_compuesto_clase }};
+{% endif %}
 import {{ paquete_base }}.repository.{{ nombre_clase }}Repository;
 import {{ paquete_base }}.service.{{ nombre_clase }}Service;
 {% for import in imports %}
@@ -33,8 +36,8 @@ public class {{ nombre_clase }}ServiceImpl implements {{ nombre_clase }}Service 
     }
 
     @Override
-    public {{ nombre_clase }}Response obtener({{ pk_tipo_java }} id) {
-        return aRespuesta(buscarPorId(id));
+    public {{ nombre_clase }}Response obtener({{ parametros_id }}) {
+        return aRespuesta(buscarPorId({{ argumentos_id }}));
     }
 
     @Override
@@ -45,15 +48,15 @@ public class {{ nombre_clase }}ServiceImpl implements {{ nombre_clase }}Service 
     }
 
     @Override
-    public {{ nombre_clase }}Response actualizar({{ pk_tipo_java }} id, {{ nombre_clase }}Request datos) {
-        {{ nombre_clase }} entidad = buscarPorId(id);
+    public {{ nombre_clase }}Response actualizar({{ parametros_id }}, {{ nombre_clase }}Request datos) {
+        {{ nombre_clase }} entidad = buscarPorId({{ argumentos_id }});
         aplicarDatos(entidad, datos);
         return aRespuesta(repository.save(entidad));
     }
 
     @Override
-    public void eliminar({{ pk_tipo_java }} id) {
-        repository.delete(buscarPorId(id));
+    public void eliminar({{ parametros_id }}) {
+        repository.delete(buscarPorId({{ argumentos_id }}));
     }
 {% for metodo in metodos_interfaz %}
 
@@ -75,9 +78,9 @@ public class {{ nombre_clase }}ServiceImpl implements {{ nombre_clase }}Service 
     }
 {% endfor %}
 
-    private {{ nombre_clase }} buscarPorId({{ pk_tipo_java }} id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("{{ nombre_clase }} no encontrado: " + id));
+    private {{ nombre_clase }} buscarPorId({{ parametros_id }}) {
+        return repository.findById({{ argumento_find_by_id }})
+                .orElseThrow(() -> new RuntimeException("{{ nombre_clase }} no encontrado: " + {{ expresion_error_id }}));
     }
 
     private void aplicarDatos({{ nombre_clase }} entidad, {{ nombre_clase }}Request datos) {

@@ -20,7 +20,10 @@ import {{ import }};
 {% endif %}
 public class {{ nombre_clase }}{% if extiende %} extends {{ extiende }}{% endif %} {
 
-{% if not extiende %}
+{% if usa_id_compuesto %}
+    @EmbeddedId
+    private {{ id_compuesto_clase }} id;
+{% elif not extiende %}
     @Id
 {% if pk_generado %}
     @GeneratedValue(strategy = GenerationType.IDENTITY)

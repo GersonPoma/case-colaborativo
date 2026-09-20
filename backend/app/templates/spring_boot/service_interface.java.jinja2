@@ -12,13 +12,13 @@ public interface {{ nombre_clase }}Service {
 
     List<{{ nombre_clase }}Response> listar();
 
-    {{ nombre_clase }}Response obtener({{ pk_tipo_java }} id);
+    {{ nombre_clase }}Response obtener({{ parametros_id }});
 
     {{ nombre_clase }}Response crear({{ nombre_clase }}Request datos);
 
-    {{ nombre_clase }}Response actualizar({{ pk_tipo_java }} id, {{ nombre_clase }}Request datos);
+    {{ nombre_clase }}Response actualizar({{ parametros_id }}, {{ nombre_clase }}Request datos);
 
-    void eliminar({{ pk_tipo_java }} id);
+    void eliminar({{ parametros_id }});
 {% for metodo in metodos %}
 
     {{ metodo.tipo_retorno }} {{ metodo.firma }};

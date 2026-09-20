@@ -1,6 +1,9 @@
 package {{ paquete_base }}.repository;
 
 import {{ paquete_base }}.entity.{{ nombre_clase }};
+{% if id_compuesto_clase %}
+import {{ paquete_base }}.entity.{{ id_compuesto_clase }};
+{% endif %}
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

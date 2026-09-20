@@ -1,0 +1,22 @@
+package {{ paquete_base }}.entity;
+
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import jakarta.persistence.Embeddable;
+import java.io.Serializable;
+
+@Embeddable
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode
+public class {{ nombre_clase }} implements Serializable {
+
+{% for campo in campos %}
+    private {{ campo.tipo_java }} {{ campo.nombre_id }};
+{% endfor %}
+}
