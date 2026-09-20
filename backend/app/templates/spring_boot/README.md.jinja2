@@ -43,6 +43,9 @@ Las relaciones del diagrama se traducen a JPA según su cardinalidad:
   - La clase dueña lleva `@OneToOne` + `@JoinColumn`; la otra queda como lado inverso (`@OneToOne(mappedBy = ...)`).
 - **Agregación / Composición:** se tratan igual que una asociación normal para la llave foránea; la composición además usa `cascade = CascadeType.ALL` y `orphanRemoval = true` del lado que contiene a la otra clase.
 - **Herencia:** se generan como herencia real de Java (`extends`) con `@Inheritance(strategy = InheritanceType.JOINED)` en la clase base.
+- **Clase asociada:** si una relación tiene una clase asociada (por ejemplo `Inscripcion` entre `Estudiante` y `Curso`), esa clase recibe automáticamente una `@ManyToOne` obligatoria hacia cada una de las dos clases relacionadas:
+  - Si la clase asociada **tiene su propio id** en el diagrama, queda como una entidad normal con esas dos relaciones además de su id.
+  - Si **no tiene id propio**, se genera una clase `@Embeddable` con los dos ids combinados (ej. `EstudianteCursoId`), la entidad usa `@EmbeddedId` + `@MapsId` en las dos relaciones, y el repositorio/service/controller pasan a identificarla por esos dos ids en vez de uno solo. Los endpoints de `obtener`/`actualizar`/`eliminar` reciben esos ids como **query params** en vez de en la URL: `GET /api/inscripcions?estudianteId=1&cursoId=2`.
 
 ## Métodos del diagrama
 
