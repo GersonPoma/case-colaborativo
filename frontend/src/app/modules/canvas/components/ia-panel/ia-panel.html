@@ -1,1 +1,54 @@
-<p>ia-panel works!</p>
+<div class="ia-panel">
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  <div class="lista" #lista>
+    @if (mensajes().length === 0) {
+      <p class="vacio">
+        Escribí o grabá una instrucción para modificar el diagrama. Por ejemplo:
+        "crea una clase Categoria con un atributo nombre de tipo texto".
+      </p>
+    }
+    @for (mensaje of mensajes(); track $index) {
+      <div class="mensaje" [class.propio]="mensaje.autor === 'yo'">
+        <span class="autor">{{ mensaje.autor === 'yo' ? 'Vos' : 'IA' }}</span>
+        <p class="contenido">{{ mensaje.texto }}</p>
+      </div>
+    }
+    @if (procesando()) {
+      <p class="estado">Pensando...</p>
+    }
+  </div>
+
+  <form class="form-enviar" [formGroup]="formulario" (ngSubmit)="enviarTexto()">
+    <input
+      type="text"
+      formControlName="texto"
+      placeholder="Escribí una instrucción..."
+      autocomplete="off"
+      [disabled]="grabando()"
+    />
+    @if (grabando()) {
+      <button
+        type="button"
+        class="boton-cancelar"
+        (click)="cancelarGrabacion()"
+        title="Cancelar grabación"
+      >
+        <svg lucideX [size]="16"></svg>
+      </button>
+    }
+    <button
+      type="button"
+      class="boton-mic"
+      [class.grabando]="grabando()"
+      [disabled]="procesando()"
+      (click)="alternarGrabacion()"
+      [title]="grabando() ? 'Enviar grabación' : 'Grabar instrucción por voz'"
+    >
+      <svg lucideMic [size]="16"></svg>
+    </button>
+    <button type="submit" [disabled]="procesando() || grabando()">Enviar</button>
+  </form>
+</div>

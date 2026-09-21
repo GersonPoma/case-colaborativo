@@ -1,0 +1,130 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.ia-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.error {
+  margin: 0;
+  padding: 0.5rem 1rem;
+  background: #fdecea;
+  color: #c62828;
+  font-size: 0.8rem;
+}
+
+.lista {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.estado,
+.vacio {
+  text-align: center;
+  color: #999;
+  font-size: 0.8rem;
+}
+
+.mensaje {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  max-width: 85%;
+  padding: 0.4rem 0.6rem;
+  border-radius: 8px;
+  background: #f2f2f2;
+  align-self: flex-start;
+
+  &.propio {
+    background: #e3f2fd;
+    align-self: flex-end;
+  }
+}
+
+.autor {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #555;
+}
+
+.contenido {
+  margin: 0;
+  font-size: 0.85rem;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.form-enviar {
+  display: flex;
+  gap: 0.4rem;
+  padding: 0.6rem;
+  border-top: 1px solid #eee;
+
+  input {
+    flex: 1;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.85rem;
+  }
+
+  button {
+    background: #1976d2;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+  }
+
+  .boton-mic,
+  .boton-cancelar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .boton-mic {
+    background: #f2f2f2;
+    color: #333;
+    padding: 0.4rem 0.6rem;
+
+    &.grabando {
+      background: #e53935;
+      color: #fff;
+      animation: pulso 1.2s infinite;
+    }
+  }
+
+  .boton-cancelar {
+    background: #f2f2f2;
+    color: #555;
+    padding: 0.4rem 0.6rem;
+  }
+}
+
+@keyframes pulso {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
