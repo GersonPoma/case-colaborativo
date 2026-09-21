@@ -24,6 +24,10 @@ class Settings(BaseSettings):
 
     GEMINI_MODEL: str = "gemini-3.5-flash-lite"
     GEMINI_API_KEY_IMAGEN: str = ""
+    GEMINI_API_KEY_REFACTOR: str = ""
+
+    GROQ_MODEL_VOZ: str = "whisper-large-v3"
+    GROQ_API_KEY_VOZ: str = ""
 
     class Config:
         env_file = ".env"
