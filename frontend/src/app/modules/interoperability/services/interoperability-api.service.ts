@@ -3,7 +3,11 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ConfigurarTranspilacion } from '../models/interoperability-api.model';
-import { ConfiguracionTranspilacion, ImportarXmiResultado } from '../models/interoperability.model';
+import {
+  ConfiguracionTranspilacion,
+  ImportarIaResultado,
+  ImportarXmiResultado,
+} from '../models/interoperability.model';
 
 @Injectable({ providedIn: 'root' })
 export class InteroperabilidadApiService {
@@ -45,6 +49,15 @@ export class InteroperabilidadApiService {
     formData.append('archivo', archivo);
     return this.http.post<ImportarXmiResultado>(
       `${this.baseUrl}/${proyectoId}/importar/xmi`,
+      formData,
+    );
+  }
+
+  importarDesdeImagen(proyectoId: number, archivo: File): Observable<ImportarIaResultado> {
+    const formData = new FormData();
+    formData.append('archivo', archivo);
+    return this.http.post<ImportarIaResultado>(
+      `${this.baseUrl}/${proyectoId}/importar/ia`,
       formData,
     );
   }

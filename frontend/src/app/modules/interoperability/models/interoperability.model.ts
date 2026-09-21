@@ -15,3 +15,8 @@ export interface ImportarXmiResultado {
   clases: Record<string, Clase>;
   relaciones: Record<string, Relacion>;
 }
+
+export interface ImportarIaResultado {
+  clases: Record<string, Clase>;
+  relaciones: Record<string, Relacion>;
+}
