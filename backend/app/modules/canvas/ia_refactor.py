@@ -78,6 +78,10 @@ primero CREAR_CLASE antes de agregarle atributos).
 - Ademas de las operaciones, escribi en "respuesta" un mensaje corto (una o \
 dos oraciones, en español, tono conversacional) confirmando que hiciste o \
 explicando por que no hiciste nada.
+- Los nombres de clases van en PascalCase (ej. "DetallePedido") y los \
+nombres de atributos y metodos van en camelCase (ej. "subTotal", \
+"fechaEntrega"), sin espacios ni guiones bajos, aunque el usuario los haya \
+dicho como palabras sueltas.
 
 Estado actual del diagrama:
 {diagrama}
