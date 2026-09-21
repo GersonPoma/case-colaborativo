@@ -9,6 +9,7 @@ from app.modules.interoperability.schema import (
     ConfigurarTranspilacion,
     ConfiguracionTranspilacionRespuesta,
 )
+from app.modules.interoperability.ia_import import generar_diagrama_desde_imagen
 from app.modules.interoperability.transpiler import generar_proyecto
 from app.modules.interoperability.xmi_export import construir_xmi
 from app.modules.interoperability.xmi_import import importar_xmi
@@ -125,6 +126,19 @@ class XmiImportService:
         proyecto = await self.proyecto_service.obtener(proyecto_id)
         await self.proyecto_service.verificar_editor(proyecto, id_usuario_solicitante)
         return importar_xmi(contenido)
+
+
+class IaImportService:
+    def __init__(self, db: AsyncSession):
+        self.db = db
+        self.proyecto_service = ProyectoService(db)
+
+    async def importar(
+        self, proyecto_id: int, id_usuario_solicitante: int, contenido: bytes, mime_type: str
+    ) -> dict:
+        proyecto = await self.proyecto_service.obtener(proyecto_id)
+        await self.proyecto_service.verificar_editor(proyecto, id_usuario_solicitante)
+        return generar_diagrama_desde_imagen(contenido, mime_type)
 
 
 class TranspilacionService:
