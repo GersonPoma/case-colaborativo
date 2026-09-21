@@ -21,5 +21,12 @@ services:
     volumes:
       - {{ nombre_bd }}_data:/var/lib/postgresql/data
 
+  adminer:
+    image: adminer
+    ports:
+      - "8081:8080"
+    depends_on:
+      - db
+
 volumes:
   {{ nombre_bd }}_data:

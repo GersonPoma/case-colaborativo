@@ -658,6 +658,7 @@ def generar_proyecto(
                 spring_boot_version=config["spring_boot_version"],
                 base_datos=bd if isinstance(bd, str) else bd.value,
                 paquete_base=paquete_base,
+                nombre_bd=_segmento_paquete(artifact_id),
             ),
         )
         zf.writestr(

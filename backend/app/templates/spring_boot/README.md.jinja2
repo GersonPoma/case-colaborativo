@@ -27,7 +27,44 @@ mvn spring-boot:run
 docker compose up --build
 ```
 
-Levanta el backend junto con una base de datos PostgreSQL (contenedor `db`), sin necesidad de tener nada instalado más que Docker. La conexión a la base de datos (`DB_URL`, `DB_USERNAME`, `DB_PASSWORD`) se puede sobreescribir por variable de entorno — `application.properties` ya las lee así, con los valores de siempre como default si no las definís.
+Levanta tres contenedores, sin necesidad de tener nada instalado más que Docker:
+
+- `backend` — la API, en el puerto `8080`.
+- `db` — PostgreSQL, en el puerto `5432`.
+- `adminer` — un administrador de base de datos por navegador, en el puerto `8081`.
+
+La conexión a la base de datos (`DB_URL`, `DB_USERNAME`, `DB_PASSWORD`) se puede sobreescribir por variable de entorno — `application.properties` ya las lee así, con los valores de siempre como default si no las definís.
+
+## Probar el proyecto
+
+**La API (por ejemplo con Postman):** cada clase del diagrama tiene su propio controller en `http://localhost:8080/api/{recurso}` (el nombre de la clase en plural/minúscula), con los verbos de siempre:
+
+```
+GET    http://localhost:8080/api/{recurso}          -> listar
+GET    http://localhost:8080/api/{recurso}/{id}      -> obtener uno
+POST   http://localhost:8080/api/{recurso}           -> crear (body = los datos del ...Request)
+PUT    http://localhost:8080/api/{recurso}/{id}      -> actualizar
+DELETE http://localhost:8080/api/{recurso}/{id}      -> eliminar
+```
+
+**La base de datos (con un cliente como DBeaver/pgAdmin, o por consola con `psql`):**
+
+```
+Host: localhost
+Puerto: 5432
+Base de datos: {{ nombre_bd }}
+Usuario: postgres
+Contraseña: postgres
+```
+
+**La base de datos por navegador (con Adminer, ya incluido en el `docker compose up`):** entrá a `http://localhost:8081`, elegí "PostgreSQL" como sistema y completá:
+
+```
+Servidor: db
+Usuario: postgres
+Contraseña: postgres
+Base de datos: {{ nombre_bd }}
+```
 
 ## Estructura del código generado
 
