@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: str = ""
     FRONTEND_URL: str = "http://localhost:4200"
 
+    GEMINI_MODEL: str = "gemini-3.5-flash-lite"
+    GEMINI_API_KEY_IMAGEN: str = ""
+
     class Config:
         env_file = ".env"
 
