@@ -74,6 +74,23 @@
       {{ importandoXmi() ? 'Importando...' : 'Importar XMI' }}
     </button>
     <input #inputArchivo type="file" accept=".xmi,.xml" hidden (change)="alSeleccionarArchivo($event)" />
+
+    <button
+      type="button"
+      class="boton-herramienta"
+      [disabled]="importandoIa()"
+      (click)="inputArchivoIa.click()"
+      title="Genera el diagrama a partir de una foto o captura de un diagrama de clases (reemplaza todo el lienzo actual)"
+    >
+      {{ importandoIa() ? 'Analizando...' : 'Foto a diagrama' }}
+    </button>
+    <input
+      #inputArchivoIa
+      type="file"
+      accept="image/png,image/jpeg,image/webp"
+      hidden
+      (change)="alSeleccionarArchivoIa($event)"
+    />
   }
 
   @if (puedeEditar()) {
