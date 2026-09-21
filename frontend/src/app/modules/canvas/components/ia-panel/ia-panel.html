@@ -3,6 +3,11 @@
     <p class="error">{{ error() }}</p>
   }
 
+  <p class="aviso-limitaciones">
+    La IA puede entender mal una instrucción, transcribir mal el audio o usar nombres/tipos
+    distintos a los que dijiste. Revisá los cambios en el lienzo después de cada instrucción.
+  </p>
+
   <div class="lista" #lista>
     @if (mensajes().length === 0) {
       <p class="vacio">
