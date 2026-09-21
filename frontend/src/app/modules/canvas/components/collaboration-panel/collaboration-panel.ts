@@ -1,12 +1,13 @@
 import { Component, effect, inject, input, signal, untracked } from '@angular/core';
 import { ChatPanel } from '../chat-panel/chat-panel';
+import { IaPanel } from '../ia-panel/ia-panel';
 import { CanvasService } from '../../services/canvas.service';
 
 type PestanaColaboracion = 'chat' | 'ia';
 
 @Component({
   selector: 'app-collaboration-panel',
-  imports: [ChatPanel],
+  imports: [ChatPanel, IaPanel],
   templateUrl: './collaboration-panel.html',
   styleUrl: './collaboration-panel.scss',
   host: {

@@ -25,7 +25,7 @@
       @if (pestanaActiva() === 'chat') {
         <app-chat-panel [proyectoId]="proyectoId()" />
       } @else {
-        <p class="proximamente">El panel de IA todavía no está listo.</p>
+        <app-ia-panel [proyectoId]="proyectoId()" />
       }
     </div>
   </div>
