@@ -12,12 +12,22 @@ Proyecto Spring Boot generado automáticamente desde el diagrama de clases de **
 
 ## Cómo ejecutarlo
 
+**Opción 1: local con Maven**
+
 1. Configura las credenciales de tu base de datos en `src/main/resources/application.properties` si no usas las que trae por defecto.
 2. Ejecuta:
 
 ```
 mvn spring-boot:run
 ```
+
+**Opción 2: con Docker**
+
+```
+docker compose up --build
+```
+
+Levanta el backend junto con una base de datos PostgreSQL (contenedor `db`), sin necesidad de tener nada instalado más que Docker. La conexión a la base de datos (`DB_URL`, `DB_USERNAME`, `DB_PASSWORD`) se puede sobreescribir por variable de entorno — `application.properties` ya las lee así, con los valores de siempre como default si no las definís.
 
 ## Estructura del código generado
 

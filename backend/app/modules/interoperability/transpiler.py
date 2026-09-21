@@ -672,6 +672,16 @@ def generar_proyecto(
             ),
         )
         zf.writestr(
+            raiz + "Dockerfile",
+            _env.get_template("Dockerfile.jinja2").render(java_version=config["java_version"]),
+        )
+        zf.writestr(
+            raiz + "docker-compose.yml",
+            _env.get_template("docker-compose.yml.jinja2").render(
+                nombre_bd=_segmento_paquete(artifact_id),
+            ),
+        )
+        zf.writestr(
             f"{raiz}src/main/java/{ruta_paquete}/{nombre_clase_principal}.java",
             _env.get_template("application.java.jinja2").render(
                 paquete_base=paquete_base, nombre_clase_principal=nombre_clase_principal
