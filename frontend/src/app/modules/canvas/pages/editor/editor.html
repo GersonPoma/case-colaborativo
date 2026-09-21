@@ -14,6 +14,7 @@
       [exportandoXmiEa]="exportandoXmiEa()"
       [exportandoImagen]="exportandoImagen()"
       [importandoXmi]="importandoXmi()"
+      [importandoIa]="importandoIa()"
       [generandoBackend]="generandoBackend()"
       (centrar)="centrar()"
       (guardarVersion)="guardarVersion()"
@@ -22,6 +23,7 @@
       (exportarXmiEa)="exportarXmiEa()"
       (exportarImagen)="exportarImagen()"
       (archivoXmiSeleccionado)="alArchivoXmiSeleccionado($event)"
+      (archivoIaSeleccionado)="alArchivoIaSeleccionado($event)"
       (generarBackend)="abrirModalBackend()"
     />
 
@@ -79,6 +81,25 @@
       <button type="button" class="boton-secundario" (click)="cancelarImportarXmi()">Cancelar</button>
       <button type="button" class="boton-peligro" [disabled]="importandoXmi()" (click)="confirmarImportarXmi()">
         {{ importandoXmi() ? 'Importando...' : 'Reemplazar lienzo' }}
+      </button>
+    </div>
+  </app-modal>
+
+  <app-modal [abierto]="archivoIaPendiente() !== null" ancho="420px" (cerrado)="cancelarImportarIa()">
+    <h2>Foto a diagrama</h2>
+    <p>
+      Se va a reemplazar <strong>todo el lienzo actual</strong> (clases y relaciones) con el
+      diagrama que la IA reconozca en "<strong>{{ archivoIaPendiente()?.name }}</strong>". Esta
+      acción no se puede deshacer una vez que otros colaboradores vean el cambio.
+    </p>
+    <p class="aviso-limitaciones">
+      La IA puede cometer errores al leer el diagrama (relaciones, cardinalidades o tipos de dato
+      incorrectos o incompletos). Revisá el resultado y corregilo en el lienzo si hace falta.
+    </p>
+    <div class="acciones-form">
+      <button type="button" class="boton-secundario" (click)="cancelarImportarIa()">Cancelar</button>
+      <button type="button" class="boton-peligro" [disabled]="importandoIa()" (click)="confirmarImportarIa()">
+        {{ importandoIa() ? 'Analizando...' : 'Reemplazar lienzo' }}
       </button>
     </div>
   </app-modal>

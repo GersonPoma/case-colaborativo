@@ -69,6 +69,8 @@ export class Editor {
   readonly exportandoImagen = signal(false);
   readonly importandoXmi = signal(false);
   readonly archivoXmiPendiente = signal<File | null>(null);
+  readonly importandoIa = signal(false);
+  readonly archivoIaPendiente = signal<File | null>(null);
   readonly generandoBackend = signal(false);
   readonly mostrarModalBackend = signal(false);
   readonly cargandoConfigTranspilacion = signal(false);
@@ -361,6 +363,35 @@ export class Editor {
       error: (err: unknown) => {
         this.importandoXmi.set(false);
         this.archivoXmiPendiente.set(null);
+        this.error.set(obtenerMensajeError(err));
+      },
+    });
+  }
+
+  alArchivoIaSeleccionado(archivo: File): void {
+    this.archivoIaPendiente.set(archivo);
+  }
+
+  cancelarImportarIa(): void {
+    this.archivoIaPendiente.set(null);
+  }
+
+  confirmarImportarIa(): void {
+    const archivo = this.archivoIaPendiente();
+    if (!archivo) {
+      return;
+    }
+    this.importandoIa.set(true);
+    this.error.set(null);
+    this.interoperabilidadApi.importarDesdeImagen(this.proyectoId, archivo).subscribe({
+      next: (resultado) => {
+        this.importandoIa.set(false);
+        this.archivoIaPendiente.set(null);
+        this.canvasService.reemplazarLienzo(resultado.clases, resultado.relaciones);
+      },
+      error: (err: unknown) => {
+        this.importandoIa.set(false);
+        this.archivoIaPendiente.set(null);
         this.error.set(obtenerMensajeError(err));
       },
     });
