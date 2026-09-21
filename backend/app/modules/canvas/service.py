@@ -20,8 +20,12 @@ from app.modules.canvas.schema import (
     ModificarUI,
     TrazarRelacion,
 )
+from app.modules.canvas.ia_aplicar import aplicar_operaciones
+from app.modules.canvas.ia_refactor import interpretar_instruccion
+from app.modules.canvas.ia_voz import transcribir_audio
 from app.modules.workspace.model import Proyecto
 from app.modules.workspace.repository import ProyectoRepository
+from app.modules.workspace.service import ProyectoService
 
 
 class CanvasService:
@@ -363,3 +367,32 @@ class CanvasService:
 
         await self._guardar_estado(proyecto, estado)
         return {"posiciones": [p.model_dump() for p in datos.posiciones]}
+
+
+class CanvasIaService:
+    def __init__(self, db: AsyncSession):
+        self.canvas_service = CanvasService(db)
+        self.proyecto_service = ProyectoService(db)
+
+    async def refactorizar_por_texto(self, proyecto_id: int, usuario_id: int, texto: str) -> dict:
+        proyecto = await self.proyecto_service.obtener(proyecto_id)
+        await self.proyecto_service.verificar_editor(proyecto, usuario_id)
+        return await self._refactorizar(proyecto_id, usuario_id, texto)
+
+    async def refactorizar_por_voz(
+        self, proyecto_id: int, usuario_id: int, contenido: bytes, nombre_archivo: str
+    ) -> dict:
+        proyecto = await self.proyecto_service.obtener(proyecto_id)
+        await self.proyecto_service.verificar_editor(proyecto, usuario_id)
+
+        texto = transcribir_audio(contenido, nombre_archivo)
+        resultado = await self._refactorizar(proyecto_id, usuario_id, texto)
+        return {"texto": texto, **resultado}
+
+    async def _refactorizar(self, proyecto_id: int, usuario_id: int, texto: str) -> dict:
+        estado = await self.canvas_service.obtener_lienzo(proyecto_id)
+        interpretado = interpretar_instruccion(texto, estado)
+        aplicadas = await aplicar_operaciones(
+            self.canvas_service, proyecto_id, usuario_id, interpretado["operaciones"]
+        )
+        return {"respuesta": interpretado["respuesta"], "operaciones_aplicadas": len(aplicadas)}

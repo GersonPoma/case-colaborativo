@@ -8,7 +8,7 @@ from app.core.security import decode_access_token
 from app.modules.auth.model import Usuario
 from app.modules.auth.repository import UsuarioRepository
 from app.modules.auth.service import PerfilService, UsuarioService
-from app.modules.canvas.service import CanvasService
+from app.modules.canvas.service import CanvasIaService, CanvasService
 from app.modules.interoperability.service import (
     ConfiguracionTranspilacionService,
     IaImportService,
@@ -54,6 +54,10 @@ async def get_mensaje_chat_service(db: AsyncSession = Depends(get_db)) -> Mensaj
 
 async def get_canvas_service(db: AsyncSession = Depends(get_db)) -> CanvasService:
     return CanvasService(db)
+
+
+async def get_canvas_ia_service(db: AsyncSession = Depends(get_db)) -> CanvasIaService:
+    return CanvasIaService(db)
 
 
 async def get_configuracion_transpilacion_service(
