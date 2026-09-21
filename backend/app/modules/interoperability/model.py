@@ -9,8 +9,6 @@ from app.core.base_model import BaseAuditable
 
 class BaseDatosDestino(str, enum.Enum):
     POSTGRESQL = "POSTGRESQL"
-    MYSQL = "MYSQL"
-    H2 = "H2"
 
 
 class ConfiguracionTranspilacion(BaseAuditable, Base):

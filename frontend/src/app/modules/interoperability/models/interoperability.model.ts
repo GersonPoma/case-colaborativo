@@ -1,6 +1,6 @@
 import { Clase, Relacion } from '../../../core/models/lienzo.model';
 
-export type BaseDatosDestino = 'POSTGRESQL' | 'MYSQL' | 'H2';
+export type BaseDatosDestino = 'POSTGRESQL';
 
 export interface ConfiguracionTranspilacion {
   configurado: boolean;

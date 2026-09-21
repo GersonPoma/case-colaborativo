@@ -70,22 +70,6 @@ _BD_INFO = {
         "usuario": "postgres",
         "clave": "postgres",
     },
-    "MYSQL": {
-        "dependencia": {"group_id": "com.mysql", "artifact_id": "mysql-connector-j", "scope": "runtime"},
-        "driver": "com.mysql.cj.jdbc.Driver",
-        "dialecto": "org.hibernate.dialect.MySQLDialect",
-        "url": "jdbc:mysql://localhost:3306/{db}",
-        "usuario": "root",
-        "clave": "root",
-    },
-    "H2": {
-        "dependencia": {"group_id": "com.h2database", "artifact_id": "h2", "scope": "runtime"},
-        "driver": "org.h2.Driver",
-        "dialecto": "org.hibernate.dialect.H2Dialect",
-        "url": "jdbc:h2:mem:{db}",
-        "usuario": "sa",
-        "clave": "",
-    },
 }
 
 
